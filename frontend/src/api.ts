@@ -1,6 +1,7 @@
 import type { Candidate, InterviewResponse, ResumeAnalysis, RoleComparisonResponse } from './types'
 
-const API_BASE = '/api'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
+const API_BASE = `${BASE_URL}/api`
 
 export async function loadCandidates(): Promise<Candidate[]> {
   // Candidates are now served from the backend, which sources them from TheBreeth.
