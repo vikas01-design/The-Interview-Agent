@@ -1,0 +1,379 @@
+{
+  "session_id": "6c2327a0-90b4-4c03-8be8-9602c06ed9c2",
+  "candidate": {
+    "member": {
+      "id": "CAND-001",
+      "name": "Sarah Johnson",
+      "jobRole": "Senior Data Engineer",
+      "yearsExperience": 9,
+      "education": "MS Computer Science",
+      "status": "COMPLETED"
+    },
+    "missions": [
+      {
+        "day": 7,
+        "title": "Embeddings Explained",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 8,
+        "title": "Vector Databases Overview",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 10,
+        "title": "Retrieval & Matching Engine",
+        "passed": true,
+        "attempts": 2
+      },
+      {
+        "day": 12,
+        "title": "Prompt Engineering Fundamentals",
+        "passed": true,
+        "attempts": 4
+      },
+      {
+        "day": 16,
+        "title": "Chatbot Backend & API Integration",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 22,
+        "title": "Multi-Agent Orchestration",
+        "passed": true,
+        "attempts": 2
+      },
+      {
+        "day": 23,
+        "title": "Model Context Protocol (MCP)",
+        "passed": true,
+        "attempts": 2
+      },
+      {
+        "day": 28,
+        "title": "Docker & Kubernetes Deployment",
+        "passed": true,
+        "attempts": 3
+      },
+      {
+        "day": 29,
+        "title": "Monitoring, Logging & Observability",
+        "skipped": true
+      },
+      {
+        "day": 31,
+        "title": "Capstone Project & Final Demo",
+        "passed": true,
+        "attempts": 1
+      }
+    ],
+    "signals": {
+      "commitDays": 28,
+      "missionsCompleted": 30,
+      "missionsFirstTry": 20
+    }
+  },
+  "candidate_analysis": {
+    "completed_days": [
+      7,
+      8,
+      10,
+      12,
+      16,
+      22,
+      23,
+      28,
+      31
+    ],
+    "skipped_days": [
+      29
+    ],
+    "failed_days": [],
+    "struggle_days": [
+      12,
+      28
+    ],
+    "strong_days": [
+      7,
+      8,
+      16,
+      31
+    ],
+    "inferred_strengths": [
+      "Day 7: Embeddings Explained",
+      "Day 8: Vector Databases Overview",
+      "Day 16: Chatbot Backend & API Integration",
+      "Day 31: Capstone Project & Final Demo"
+    ],
+    "inferred_weaknesses": [
+      "Day 12: Prompt Engineering Fundamentals",
+      "Day 28: Docker & Kubernetes Deployment",
+      "Skipped Day 29: Monitoring, Logging & Observability"
+    ],
+    "target_days": [
+      12,
+      28,
+      7,
+      8,
+      10,
+      16,
+      22,
+      23,
+      31
+    ]
+  },
+  "status": "active",
+  "question_number": 3,
+  "covered_days": [
+    12,
+    28
+  ],
+  "covered_topics": [
+    "Prompt Engineering Fundamentals",
+    "Docker & Kubernetes Deployment"
+  ],
+  "current_day": 28,
+  "current_topic": "Docker & Kubernetes Deployment",
+  "difficulty": "easy",
+  "follow_up_depth": 0,
+  "pending_follow_up": false,
+  "consecutive_idks_on_topic": 0,
+  "abandoned_days": [],
+  "transcript": [
+    {
+      "role": "interviewer",
+      "content": "Welcome, Sarah Johnson — glad to have you here today. Let's start with something foundational. Can you explain the core idea behind Prompt Engineering Fundamentals? What problem does it solve?",
+      "question_meta": {
+        "day": 12,
+        "topic": "Prompt Engineering Fundamentals",
+        "question_type": "concept",
+        "difficulty": "easy",
+        "is_follow_up": false
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "I don't know.",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "No problem at all! Let's approach it from a simpler angle. When you worked with Prompt Engineering Fundamentals, what was the main problem or tool you focused on?",
+      "question_meta": {
+        "day": 12,
+        "topic": "Prompt Engineering Fundamentals",
+        "question_type": "concept",
+        "difficulty": "easy",
+        "is_follow_up": false
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "When working with Prompt Engineering Fundamentals, the main focus was on designing and refining prompts to control AI outputs effectively. The biggest challenge wasn’t a single tool—it was the problem of ambiguity.\n\n🔑 Core Problem\nAI models are highly sensitive to phrasing. A vague or loosely structured prompt often leads to:\n\nUnclear or inconsistent answers\n\nOverly generic responses\n\nMissing context or incomplete reasoning\n\nThe fundamental issue was: How do we craft prompts that consistently yield accurate, relevant, and useful outputs?\n\n🛠️ Main Tools & Techniques\nInstead of one tool, it was a set of strategies:\n\nRole assignment → e.g., “Act as a data scientist…” to anchor the AI’s perspective.\n\nStep-by-step instructions → breaking tasks into smaller, logical steps.\n\nConstraints & formatting → specifying output style (tables, bullet points, LaTeX for math).\n\nIterative refinement → testing prompts, analyzing weaknesses, and adjusting wording.\n\nContext injection → feeding background info so the AI doesn’t guess.",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "Walk me through how you would implement the key components from Docker & Kubernetes Deployment in a production system.",
+      "question_meta": {
+        "day": 28,
+        "topic": "Docker & Kubernetes Deployment",
+        "question_type": "implementation",
+        "difficulty": "easy",
+        "is_follow_up": false
+      }
+    }
+  ],
+  "knowledge_model": {
+    "7": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "8": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "10": {
+      "knowledge": 0.55,
+      "depth": 0.55,
+      "reasoning": 0.55,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "12": {
+      "knowledge": 0.446,
+      "depth": 0.426,
+      "reasoning": 0.446,
+      "evidence": [
+        "Provided relevant technical response"
+      ],
+      "misconceptions": []
+    },
+    "16": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "22": {
+      "knowledge": 0.55,
+      "depth": 0.55,
+      "reasoning": 0.55,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "23": {
+      "knowledge": 0.55,
+      "depth": 0.55,
+      "reasoning": 0.55,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "28": {
+      "knowledge": 0.45,
+      "depth": 0.45,
+      "reasoning": 0.45,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "31": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    }
+  },
+  "evaluations": [
+    {
+      "score": 2.0,
+      "overallScore": 20,
+      "relevance": 0.3,
+      "technicalCorrectness": 0.1,
+      "correctness": 0.1,
+      "depth": 0.1,
+      "structure": 0.2,
+      "reasoning": 0.1,
+      "clarity": 0.6,
+      "strengths": [],
+      "weaknesses": [],
+      "misconceptions": [],
+      "missingConcepts": [
+        "Foundational understanding of the topic"
+      ],
+      "missing_concepts": [
+        "Foundational understanding of the topic"
+      ],
+      "recommendedFollowUp": "foundational concept — ask a simpler version",
+      "recommended_followup": "foundational concept — ask a simpler version",
+      "candidate_claims": [],
+      "communication": {
+        "communicationScore": 50,
+        "clarity": 0.5,
+        "confidence": 0.2,
+        "structure": 0.4,
+        "conciseness": 0.9,
+        "technicalCommunication": 0.3,
+        "observations": [
+          "Candidate passed or stated lack of familiarity"
+        ],
+        "improvements": [
+          "Build foundational concepts before technical deep dives"
+        ]
+      }
+    },
+    {
+      "score": 6.5,
+      "overallScore": 65,
+      "relevance": 0.85,
+      "technicalCorrectness": 0.65,
+      "correctness": 0.65,
+      "depth": 0.6,
+      "structure": 0.7,
+      "reasoning": 0.65,
+      "clarity": 0.75,
+      "strengths": [
+        "Provided relevant technical response"
+      ],
+      "weaknesses": [],
+      "misconceptions": [],
+      "missingConcepts": [],
+      "missing_concepts": [],
+      "recommendedFollowUp": null,
+      "recommended_followup": null,
+      "candidate_claims": [],
+      "communication": {
+        "communicationScore": 75,
+        "clarity": 0.75,
+        "confidence": 0.7,
+        "structure": 0.7,
+        "conciseness": 0.8,
+        "technicalCommunication": 0.7,
+        "observations": [
+          "Structured technical response"
+        ],
+        "improvements": [
+          "Include specific trade-offs and metrics"
+        ]
+      }
+    }
+  ],
+  "last_evaluation": {
+    "score": 6.5,
+    "overallScore": 65,
+    "relevance": 0.85,
+    "technicalCorrectness": 0.65,
+    "correctness": 0.65,
+    "depth": 0.6,
+    "structure": 0.7,
+    "reasoning": 0.65,
+    "clarity": 0.75,
+    "strengths": [
+      "Provided relevant technical response"
+    ],
+    "weaknesses": [],
+    "misconceptions": [],
+    "missingConcepts": [],
+    "missing_concepts": [],
+    "recommendedFollowUp": null,
+    "recommended_followup": null,
+    "candidate_claims": [],
+    "communication": {
+      "communicationScore": 75,
+      "clarity": 0.75,
+      "confidence": 0.7,
+      "structure": 0.7,
+      "conciseness": 0.8,
+      "technicalCommunication": 0.7,
+      "observations": [
+        "Structured technical response"
+      ],
+      "improvements": [
+        "Include specific trade-offs and metrics"
+      ]
+    }
+  },
+  "asked_questions": [
+    "welcome, sarah johnson — glad to have you here today. let's start with something foundational. can you explain the core idea behind prompt engineering fundamentals? what problem does it solve?",
+    "no problem at all! let's approach it from a simpler angle. when you worked with prompt engineering fundamentals, what was the main problem or tool you focused on?",
+    "walk me through how you would implement the key components from docker & kubernetes deployment in a production system."
+  ],
+  "last_question_meta": {
+    "day": 28,
+    "topic": "Docker & Kubernetes Deployment",
+    "question_type": "implementation",
+    "difficulty": "easy",
+    "is_follow_up": false
+  },
+  "awaiting_answer": true
+}

@@ -1,0 +1,245 @@
+{
+  "session_id": "fab727cf-8b66-4df4-b588-9ef2a19c24cd",
+  "candidate": {
+    "member": {
+      "id": "CAND-002",
+      "name": "Alex Turner",
+      "jobRole": "Backend Software Engineer",
+      "yearsExperience": 5,
+      "education": "B.Tech Computer Science",
+      "status": "COMPLETED"
+    },
+    "missions": [
+      {
+        "day": 7,
+        "title": "Embeddings Explained",
+        "passed": true,
+        "attempts": 3
+      },
+      {
+        "day": 8,
+        "title": "Vector Databases Overview",
+        "passed": true,
+        "attempts": 2
+      },
+      {
+        "day": 10,
+        "title": "Retrieval & Matching Engine",
+        "passed": true,
+        "attempts": 4
+      },
+      {
+        "day": 12,
+        "title": "Prompt Engineering Fundamentals",
+        "passed": true,
+        "attempts": 5
+      },
+      {
+        "day": 13,
+        "title": "Function Calling & Structured Outputs",
+        "passed": true,
+        "attempts": 4
+      },
+      {
+        "day": 16,
+        "title": "Chatbot Backend & API Integration",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 18,
+        "title": "Streaming Responses",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 22,
+        "title": "Multi-Agent Orchestration",
+        "passed": true,
+        "attempts": 3
+      },
+      {
+        "day": 28,
+        "title": "Docker & Kubernetes Deployment",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 31,
+        "title": "Capstone Project & Final Demo",
+        "passed": true,
+        "attempts": 2
+      }
+    ],
+    "signals": {
+      "commitDays": 22,
+      "missionsCompleted": 29,
+      "missionsFirstTry": 10
+    }
+  },
+  "candidate_analysis": {
+    "completed_days": [
+      7,
+      8,
+      10,
+      12,
+      13,
+      16,
+      18,
+      22,
+      28,
+      31
+    ],
+    "skipped_days": [],
+    "failed_days": [],
+    "struggle_days": [
+      7,
+      10,
+      12,
+      13,
+      22
+    ],
+    "strong_days": [
+      16,
+      18,
+      28
+    ],
+    "inferred_strengths": [
+      "Day 16: Chatbot Backend & API Integration",
+      "Day 18: Full-Stack Integration & Streaming Responses",
+      "Day 28: Docker & Kubernetes Deployment"
+    ],
+    "inferred_weaknesses": [
+      "Day 7: Embeddings Explained",
+      "Day 10: The Retrieval & Matching Engine",
+      "Day 12: Prompt Engineering Fundamentals",
+      "Day 13: Advanced Prompting: Function Calling & Structured Outputs",
+      "Day 22: Multi-Agent Orchestration"
+    ],
+    "target_days": [
+      7,
+      10,
+      12,
+      13,
+      22,
+      8,
+      16,
+      18,
+      28,
+      31
+    ]
+  },
+  "status": "active",
+  "question_number": 1,
+  "covered_days": [
+    7
+  ],
+  "covered_topics": [
+    "Embeddings Explained"
+  ],
+  "current_day": 7,
+  "current_topic": "Embeddings Explained",
+  "difficulty": "easy",
+  "follow_up_depth": 0,
+  "pending_follow_up": false,
+  "consecutive_idks_on_topic": 0,
+  "abandoned_days": [],
+  "transcript": [
+    {
+      "role": "interviewer",
+      "content": "Welcome, Alex Turner — glad to have you here today. Let's start with something foundational. Can you explain the core idea behind Embeddings Explained? What problem does it solve?",
+      "question_meta": {
+        "day": 7,
+        "topic": "Embeddings Explained",
+        "question_type": "concept",
+        "difficulty": "easy",
+        "is_follow_up": false
+      }
+    }
+  ],
+  "knowledge_model": {
+    "7": {
+      "knowledge": 0.45,
+      "depth": 0.45,
+      "reasoning": 0.45,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "8": {
+      "knowledge": 0.55,
+      "depth": 0.55,
+      "reasoning": 0.55,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "10": {
+      "knowledge": 0.45,
+      "depth": 0.45,
+      "reasoning": 0.45,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "12": {
+      "knowledge": 0.45,
+      "depth": 0.45,
+      "reasoning": 0.45,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "13": {
+      "knowledge": 0.45,
+      "depth": 0.45,
+      "reasoning": 0.45,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "16": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "18": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "22": {
+      "knowledge": 0.45,
+      "depth": 0.45,
+      "reasoning": 0.45,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "28": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "31": {
+      "knowledge": 0.55,
+      "depth": 0.55,
+      "reasoning": 0.55,
+      "evidence": [],
+      "misconceptions": []
+    }
+  },
+  "evaluations": [],
+  "last_evaluation": null,
+  "asked_questions": [
+    "welcome, alex turner — glad to have you here today. let's start with something foundational. can you explain the core idea behind embeddings explained? what problem does it solve?"
+  ],
+  "last_question_meta": {
+    "day": 7,
+    "topic": "Embeddings Explained",
+    "question_type": "concept",
+    "difficulty": "easy",
+    "is_follow_up": false
+  },
+  "awaiting_answer": true
+}

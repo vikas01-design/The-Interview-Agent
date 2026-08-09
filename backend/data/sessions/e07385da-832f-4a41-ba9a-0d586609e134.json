@@ -1,0 +1,439 @@
+{
+  "session_id": "e07385da-832f-4a41-ba9a-0d586609e134",
+  "candidate": {
+    "member": {
+      "id": "user_3HgDSGMCe3ADv7MYOfB0DxSOFia",
+      "name": "Vikas Elle",
+      "jobRole": "AI Engineer",
+      "yearsExperience": 3,
+      "education": "B.S. Computer Science / AI",
+      "status": "Active Candidate (79% Score, 82% Tech, 85% Comm)"
+    },
+    "missions": [
+      {
+        "day": 1,
+        "title": "Python & Data Structures Refresher",
+        "passed": true,
+        "skipped": false,
+        "attempts": 1
+      },
+      {
+        "day": 2,
+        "title": "LLM API Integration & Prompting",
+        "passed": true,
+        "skipped": false,
+        "attempts": 1
+      },
+      {
+        "day": 3,
+        "title": "Tokenization & Embeddings Deep Dive",
+        "passed": true,
+        "skipped": false,
+        "attempts": 1
+      },
+      {
+        "day": 4,
+        "title": "Vector Database Fundamentals (ChromaDB)",
+        "passed": false,
+        "skipped": true,
+        "attempts": 0
+      },
+      {
+        "day": 5,
+        "title": "RAG Pipeline Construction from Scratch",
+        "passed": true,
+        "skipped": false,
+        "attempts": 1
+      },
+      {
+        "day": 6,
+        "title": "Chunking Strategies & Document Loaders",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 7,
+        "title": "Retrieval Evaluation (Recall@K, MRR)",
+        "passed": true,
+        "skipped": false,
+        "attempts": 1
+      },
+      {
+        "day": 8,
+        "title": "Semantic Search & Hybrid Keyword Search",
+        "passed": true,
+        "skipped": false,
+        "attempts": 1
+      },
+      {
+        "day": 9,
+        "title": "Reranking Models & Cross-Encoders",
+        "passed": false,
+        "skipped": true,
+        "attempts": 0
+      },
+      {
+        "day": 10,
+        "title": "Agentic AI Architectures & Tools",
+        "passed": true,
+        "skipped": false,
+        "attempts": 1
+      },
+      {
+        "day": 11,
+        "title": "ReAct Framework & Tool Calling",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 12,
+        "title": "LangChain & LlamaIndex Frameworks",
+        "passed": true,
+        "skipped": false,
+        "attempts": 1
+      },
+      {
+        "day": 13,
+        "title": "Model Context Protocol (MCP) Tools",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 14,
+        "title": "Advanced Vector Indexes (HNSW, IVFFlat)",
+        "passed": true,
+        "skipped": false,
+        "attempts": 1
+      },
+      {
+        "day": 15,
+        "title": "Fine-Tuning Foundations (LoRA/QLoRA)",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 16,
+        "title": "Dataset Curation & Evaluation Models",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 17,
+        "title": "LLM Observability & Tracing (LangSmith)",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 18,
+        "title": "Prompt Injection & AI Security",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 19,
+        "title": "Async Python & FastAPI Microservices",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 20,
+        "title": "Dockerization of AI Microservices",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 21,
+        "title": "Kubernetes Deployment for LLM Apps",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 22,
+        "title": "Caching Strategies (Redis & Semantic Cache)",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 23,
+        "title": "Streaming API Responses & WebSockets",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 24,
+        "title": "Multi-Agent System Orchestration",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 25,
+        "title": "Automated Testing for LLM Pipelines",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 26,
+        "title": "Cost Optimization & Token Budgeting",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 27,
+        "title": "Local LLM Deployment (Ollama/vLLM)",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 28,
+        "title": "GPU Memory Optimization (KVCache)",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 29,
+        "title": "Enterprise RAG System Architecture",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 30,
+        "title": "Production AI Monitoring & Drift Detection",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      },
+      {
+        "day": 31,
+        "title": "Capstone: End-to-End Autonomous AI Agent",
+        "passed": false,
+        "skipped": false,
+        "attempts": 0
+      }
+    ],
+    "signals": {
+      "commitDays": 13,
+      "missionsCompleted": 9,
+      "missionsFirstTry": 7
+    }
+  },
+  "candidate_analysis": {
+    "completed_days": [
+      1,
+      2,
+      3,
+      5,
+      7,
+      8,
+      10,
+      12,
+      14
+    ],
+    "skipped_days": [
+      4,
+      9
+    ],
+    "failed_days": [
+      6,
+      11,
+      13,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "struggle_days": [],
+    "strong_days": [
+      1,
+      2,
+      3,
+      5,
+      7,
+      8,
+      10,
+      12,
+      14
+    ],
+    "inferred_strengths": [
+      "Day 1: VS Code & Python Environment Setup",
+      "Day 2: Local LLM & AI Coding Assistant Setup",
+      "Day 3: First AI Project, React Frontend & GitHub",
+      "Day 5: Reading & Processing Unstructured Data",
+      "Day 7: Embeddings Explained"
+    ],
+    "inferred_weaknesses": [
+      "Day 6: Building the Knowledge Base",
+      "Day 11: RAG End-to-End & LLM API Basics",
+      "Day 13: Advanced Prompting: Function Calling & Structured Outputs",
+      "Day 15: Fine-Tuning: Hands-On with LoRA & QLoRA",
+      "Day 16: Chatbot Backend & API Integration",
+      "Day 17: Chatbot Frontend Development",
+      "Day 18: Full-Stack Integration & Streaming Responses",
+      "Day 19: Response Formatting & Rich Outputs",
+      "Day 20: Conversation Memory & Context Management",
+      "Day 21: Agentic Frameworks: LangChain Agents & Tool Use",
+      "Day 22: Multi-Agent Orchestration",
+      "Day 23: Model Context Protocol (MCP)",
+      "Day 24: Agentic Chatbot Integration",
+      "Day 25: Chatbot Evaluation & Testing",
+      "Day 26: Performance Optimization & Cost Management",
+      "Day 27: Security, Privacy & Guardrails",
+      "Day 28: Docker & Kubernetes Deployment",
+      "Day 29: Monitoring, Logging & Observability",
+      "Day 30: Production Readiness & Final Testing",
+      "Day 31: Capstone Project & Final Demo",
+      "Skipped Day 4: Reading & Processing Structured Data",
+      "Skipped Day 9: Building & Populating the Vector Database"
+    ],
+    "target_days": [
+      6,
+      11,
+      13,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ]
+  },
+  "status": "active",
+  "question_number": 1,
+  "covered_days": [
+    6
+  ],
+  "covered_topics": [
+    "Building the Knowledge Base"
+  ],
+  "current_day": 6,
+  "current_topic": "Building the Knowledge Base",
+  "difficulty": "easy",
+  "follow_up_depth": 0,
+  "pending_follow_up": false,
+  "consecutive_idks_on_topic": 0,
+  "abandoned_days": [],
+  "transcript": [
+    {
+      "role": "interviewer",
+      "content": "Welcome, Vikas Elle — glad to have you here today. Let's start with something foundational. Can you explain the core idea behind Building the Knowledge Base? What problem does it solve?",
+      "question_meta": {
+        "day": 6,
+        "topic": "Building the Knowledge Base",
+        "question_type": "concept",
+        "difficulty": "easy",
+        "is_follow_up": false
+      }
+    }
+  ],
+  "knowledge_model": {
+    "1": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "2": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "3": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "5": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "7": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "8": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "10": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "12": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "14": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    }
+  },
+  "evaluations": [],
+  "last_evaluation": null,
+  "asked_questions": [
+    "welcome, vikas elle — glad to have you here today. let's start with something foundational. can you explain the core idea behind building the knowledge base? what problem does it solve?"
+  ],
+  "last_question_meta": {
+    "day": 6,
+    "topic": "Building the Knowledge Base",
+    "question_type": "concept",
+    "difficulty": "easy",
+    "is_follow_up": false
+  },
+  "awaiting_answer": true
+}

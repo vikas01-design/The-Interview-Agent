@@ -1,0 +1,485 @@
+{
+  "session_id": "b016a45b-8056-44de-941f-fa096c599aac",
+  "candidate": {
+    "member": {
+      "id": "CAND-003",
+      "name": "Emily Chen",
+      "jobRole": "AI Engineer",
+      "yearsExperience": 6,
+      "education": "MS Artificial Intelligence",
+      "status": "COMPLETED"
+    },
+    "missions": [
+      {
+        "day": 7,
+        "title": "Embeddings Explained",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 8,
+        "title": "Vector Databases Overview",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 10,
+        "title": "Retrieval & Matching Engine",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 11,
+        "title": "RAG End-to-End & LLM API Basics",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 12,
+        "title": "Prompt Engineering Fundamentals",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 13,
+        "title": "Function Calling & Structured Outputs",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 21,
+        "title": "LangChain Agents",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 22,
+        "title": "Multi-Agent Orchestration",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 23,
+        "title": "Model Context Protocol (MCP)",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 31,
+        "title": "Capstone Project & Final Demo",
+        "passed": true,
+        "attempts": 1
+      }
+    ],
+    "signals": {
+      "commitDays": 31,
+      "missionsCompleted": 31,
+      "missionsFirstTry": 30
+    }
+  },
+  "candidate_analysis": {
+    "completed_days": [
+      7,
+      8,
+      10,
+      11,
+      12,
+      13,
+      21,
+      22,
+      23,
+      31
+    ],
+    "skipped_days": [],
+    "failed_days": [],
+    "struggle_days": [],
+    "strong_days": [
+      7,
+      8,
+      10,
+      11,
+      12,
+      13,
+      21,
+      22,
+      23,
+      31
+    ],
+    "inferred_strengths": [
+      "Day 7: Embeddings Explained",
+      "Day 8: Vector Databases Overview",
+      "Day 10: The Retrieval & Matching Engine",
+      "Day 11: RAG End-to-End & LLM API Basics",
+      "Day 12: Prompt Engineering Fundamentals"
+    ],
+    "inferred_weaknesses": [],
+    "target_days": [
+      7,
+      8,
+      10,
+      11,
+      12,
+      13,
+      21,
+      22,
+      23,
+      31
+    ]
+  },
+  "status": "active",
+  "question_number": 8,
+  "covered_days": [
+    7,
+    8,
+    10,
+    11,
+    12
+  ],
+  "covered_topics": [
+    "Embeddings Explained",
+    "Vector Databases Overview",
+    "The Retrieval & Matching Engine",
+    "RAG End-to-End & LLM API Basics",
+    "Prompt Engineering Fundamentals"
+  ],
+  "current_day": 12,
+  "current_topic": "Prompt Engineering Fundamentals",
+  "difficulty": "hard",
+  "follow_up_depth": 0,
+  "pending_follow_up": false,
+  "consecutive_idks_on_topic": 0,
+  "abandoned_days": [
+    7
+  ],
+  "transcript": [
+    {
+      "role": "interviewer",
+      "content": "Welcome, Emily Chen — glad to have you here today. Let's start with something foundational. Can you explain the core idea behind Embeddings Explained? What problem does it solve?",
+      "question_meta": {
+        "day": 7,
+        "topic": "Embeddings Explained",
+        "question_type": "concept",
+        "difficulty": "hard",
+        "is_follow_up": false
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "i dont know",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "No problem at all! Let's approach it from a simpler angle. When you worked with Embeddings Explained, what was the main problem or tool you focused on?",
+      "question_meta": {
+        "day": 7,
+        "topic": "Embeddings Explained",
+        "question_type": "concept",
+        "difficulty": "easy",
+        "is_follow_up": false
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "i dont have any prior experience about theis topic",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "Can you explain the core idea behind Vector Databases Overview? What problem does it solve?",
+      "question_meta": {
+        "day": 8,
+        "topic": "Vector Databases Overview",
+        "question_type": "concept",
+        "difficulty": "hard",
+        "is_follow_up": false
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "Semantic Search over Unstructured Data\n\nProblem: Keyword-based search fails when queries and documents use different phrasing or synonyms (e.g., \"vehicle repair\" vs \"car fix\").\nSolution: Embeddings map semantically similar concepts close to each other in vector space, allowing vector databases to perform similarity search based on meaning rather than exact word matches.\nHigh-Dimensional Scaling & Latency\n\nProblem: Performing exact nearest neighbor search (k-NN) across millions of 1536-dimensional vectors requires comparing the query vector against every stored vector (\nO\n(\nN\n⋅\nD\n)\nO(N⋅D) time complexity), which is prohibitively slow for real-time production APIs.\nSolution: Vector databases use specialized graph- or cluster-based ANN indexing to reduce search time to logarithmic or sub-linear scale (\nO\n(\nlog\n⁡\nN\n)\nO(logN)), enabling sub-100ms retrieval across billions of records.\nGrounding Production AI (RAG & Memory for Agents)\n\nProblem: Large Language Models suffer from context length limits, hallucinations, and stale knowledge.\nSolution: Vector databases serve as long-term external memory for AI systems (Retrieval-Augmented Generation / RAG), dynamically retrieving the most relevant context chunks to inject into LLM prompts.",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "Why is the approach in The Retrieval & Matching Engine preferred over simpler alternatives? What are the specific advantages?",
+      "question_meta": {
+        "day": 10,
+        "topic": "The Retrieval & Matching Engine",
+        "question_type": "why",
+        "difficulty": "hard",
+        "is_follow_up": false
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "A modern Retrieval & Matching Engine (such as vector-based Approximate Nearest Neighbor search combined with hybrid retrieval and re-ranking) is preferred over simpler alternatives like basic SQL queries (LIKE/WHERE), exact $k$-Nearest Neighbors ($k$-NN), or simple keyword/BM25 search because it solves the core limitations of scale, speed, and semantic understanding.Key advantages over simpler alternatives include:1. High-Dimensional Latency & Sub-Linear ScalingThe Problem with Simpler Approaches (Exact $k$-NN / Full Scans): Exact nearest neighbor search requires calculating the vector distance (e.g., Cosine or Euclidean distance) between a query vector and every vector in the dataset. This scales linearly as $\\mathcal{O}(N \\cdot D)$, where $N$ is the dataset size and $D$ is the embedding dimension. For millions of high-dimensional vectors (e.g., $D = 1536$), a single query takes seconds or minutes.Engine Advantage: Retrieval engines use specialized Approximate Nearest Neighbor (ANN) indexing algorithms (such as HNSW graphs, IVF-PQ, or ScaNN). These structures trade a tiny fraction of recall accuracy to reduce search time to logarithmic $\\mathcal{O}(\\log N)$ or sub-linear scale, enabling sub-100ms retrieval latency over billions of records.2. Semantic & Conceptual Context MatchingThe Problem with Simpler Approaches (Keyword / Exact Match Search): Traditional relational database queries or basic text-matching engines (like standard regex or basic TF-IDF) rely on exact token matches. They fail when queries use synonyms, different phrasing, or alternate languages (e.g., failing to match \"vehicle repair\" with \"car fix\").Engine Advantage: Modern retrieval engines operate in dense vector space where semantic meaning is encoded numerically. Objects or texts with similar meanings map close together regardless of exact wording, capturing nuance, intent, and cross-lingual meaning.3. Multi-Modal and Unstructured Data SearchThe Problem with Simpler Approaches: Standard database engines require structured schemas (tables, text columns, tags) to perform queries.Engine Advantage: Retrieval and matching engines abstract diverse data types (text, images, audio, user behavioral embeddings) into unified vector representations. This enables complex similarity queries like searching across modalities (e.g., using an image to find similar text product listings).4. Hybrid Search & Re-Ranking Pipeline FlexibilityThe Problem with Single-Method Baselines: Relying solely on pure keyword search misses semantic context, while relying solely on pure vector search can miss explicit exact matches (like serial numbers, product IDs, or proper names).Engine Advantage: Dedicated retrieval systems often combine sparse keyword search (BM25) with dense vector search (ANN), followed by a fine-grained cross-encoder re-ranker. This hybrid architecture provides high recall in the candidate retrieval phase while ensuring maximum precision in the final top-K matches.5. Efficient Memory & Resource FootprintThe Problem with In-Memory Multi-Gigabyte Arrays: Storing raw high-dimensional embeddings directly in RAM across scale becomes prohibitively expensive.Engine Advantage: Advanced matching engines implement techniques like Product Quantization (PQ) and memory-mapped disk storage (e.g., DiskANN). This drastically compresses vector sizes (often by $10\\times$–$30\\times$) while retaining high search quality, making production deployments cost-effective.",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "What trade-offs would you weigh when making design decisions in RAG End-to-End & LLM API Basics? Think about performance, cost, and complexity.",
+      "question_meta": {
+        "day": 11,
+        "topic": "RAG End-to-End & LLM API Basics",
+        "question_type": "tradeoff",
+        "difficulty": "hard",
+        "is_follow_up": false
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "i dont know",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "No problem at all! Let's approach it from a simpler angle. When you worked with RAG End-to-End & LLM API Basics, what was the main problem or tool you focused on?",
+      "question_meta": {
+        "day": 11,
+        "topic": "RAG End-to-End & LLM API Basics",
+        "question_type": "concept",
+        "difficulty": "easy",
+        "is_follow_up": false
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "The primary focus is maintaining retrieval accuracy and grounded generation while controlling API latency and context window costs. Key tools include vector databases for similarity retrieval, framework orchestrators like LangChain or LlamaIndex, and re-ranking pipelines to refine context before hitting the LLM.",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "Looking closer at RAG End-to-End & LLM API Basics, what key trade-offs or design choices did you consider when implementing it?",
+      "question_meta": {
+        "day": 11,
+        "topic": "RAG End-to-End & LLM API Basics",
+        "question_type": "follow_up",
+        "difficulty": "easy",
+        "is_follow_up": true
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "Implementing an end-to-end RAG system requires balancing chunk size (small chunks improve semantic precision but lose context, while larger chunks preserve background at higher token costs), retrieval mechanism (pure vector search excels at conceptual matching, whereas hybrid retrieval adds exact keyword precision at the cost of index complexity), re-ranking (cross-encoders significantly improve top-K relevance but introduce added network latency), and LLM model selection (smaller models like GPT-4o-mini minimize latency and costs, whereas larger reasoning models better synthesize multi-source context and minimize hallucinations).",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "Design a scalable architecture that incorporates the concepts from Prompt Engineering Fundamentals. What components would you include and why?",
+      "question_meta": {
+        "day": 12,
+        "topic": "Prompt Engineering Fundamentals",
+        "question_type": "architecture",
+        "difficulty": "hard",
+        "is_follow_up": false
+      }
+    }
+  ],
+  "knowledge_model": {
+    "7": {
+      "knowledge": 0.474,
+      "depth": 0.434,
+      "reasoning": 0.434,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "8": {
+      "knowledge": 0.71,
+      "depth": 0.69,
+      "reasoning": 0.69,
+      "evidence": [
+        "Provided a detailed response covering multiple aspects"
+      ],
+      "misconceptions": []
+    },
+    "10": {
+      "knowledge": 0.71,
+      "depth": 0.69,
+      "reasoning": 0.69,
+      "evidence": [
+        "Provided a detailed response covering multiple aspects"
+      ],
+      "misconceptions": []
+    },
+    "11": {
+      "knowledge": 0.568,
+      "depth": 0.536,
+      "reasoning": 0.536,
+      "evidence": [
+        "Provided a detailed response covering multiple aspects"
+      ],
+      "misconceptions": []
+    },
+    "12": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "13": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "21": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "22": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "23": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "31": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    }
+  },
+  "evaluations": [
+    {
+      "score": 2.0,
+      "correctness": 0.1,
+      "depth": 0.1,
+      "clarity": 0.5,
+      "reasoning": 0.1,
+      "strengths": [],
+      "misconceptions": [],
+      "missing_concepts": [
+        "foundational understanding of the topic"
+      ],
+      "recommended_followup": "foundational concept — ask a simpler version",
+      "candidate_claims": []
+    },
+    {
+      "score": 4.5,
+      "correctness": 0.45,
+      "depth": 0.35,
+      "clarity": 0.55,
+      "reasoning": 0.35,
+      "strengths": [],
+      "misconceptions": [],
+      "missing_concepts": [],
+      "recommended_followup": "clarification of key points",
+      "candidate_claims": []
+    },
+    {
+      "score": 6.5,
+      "correctness": 0.65,
+      "depth": 0.6,
+      "clarity": 0.7,
+      "reasoning": 0.6,
+      "strengths": [
+        "Provided a detailed response covering multiple aspects"
+      ],
+      "misconceptions": [],
+      "missing_concepts": [],
+      "recommended_followup": null,
+      "candidate_claims": []
+    },
+    {
+      "score": 6.5,
+      "correctness": 0.65,
+      "depth": 0.6,
+      "clarity": 0.7,
+      "reasoning": 0.6,
+      "strengths": [
+        "Provided a detailed response covering multiple aspects"
+      ],
+      "misconceptions": [],
+      "missing_concepts": [],
+      "recommended_followup": null,
+      "candidate_claims": []
+    },
+    {
+      "score": 2.0,
+      "correctness": 0.1,
+      "depth": 0.1,
+      "clarity": 0.5,
+      "reasoning": 0.1,
+      "strengths": [],
+      "misconceptions": [],
+      "missing_concepts": [
+        "foundational understanding of the topic"
+      ],
+      "recommended_followup": "foundational concept — ask a simpler version",
+      "candidate_claims": []
+    },
+    {
+      "score": 5.5,
+      "correctness": 0.55,
+      "depth": 0.5,
+      "clarity": 0.6,
+      "reasoning": 0.5,
+      "strengths": [],
+      "misconceptions": [],
+      "missing_concepts": [],
+      "recommended_followup": null,
+      "candidate_claims": []
+    },
+    {
+      "score": 6.5,
+      "correctness": 0.65,
+      "depth": 0.6,
+      "clarity": 0.7,
+      "reasoning": 0.6,
+      "strengths": [
+        "Provided a detailed response covering multiple aspects"
+      ],
+      "misconceptions": [],
+      "missing_concepts": [],
+      "recommended_followup": null,
+      "candidate_claims": []
+    }
+  ],
+  "last_evaluation": {
+    "score": 6.5,
+    "correctness": 0.65,
+    "depth": 0.6,
+    "clarity": 0.7,
+    "reasoning": 0.6,
+    "strengths": [
+      "Provided a detailed response covering multiple aspects"
+    ],
+    "misconceptions": [],
+    "missing_concepts": [],
+    "recommended_followup": null,
+    "candidate_claims": []
+  },
+  "asked_questions": [
+    "welcome, emily chen — glad to have you here today. let's start with something foundational. can you explain the core idea behind embeddings explained? what problem does it solve?",
+    "no problem at all! let's approach it from a simpler angle. when you worked with embeddings explained, what was the main problem or tool you focused on?",
+    "can you explain the core idea behind vector databases overview? what problem does it solve?",
+    "why is the approach in the retrieval & matching engine preferred over simpler alternatives? what are the specific advantages?",
+    "what trade-offs would you weigh when making design decisions in rag end-to-end & llm api basics? think about performance, cost, and complexity.",
+    "no problem at all! let's approach it from a simpler angle. when you worked with rag end-to-end & llm api basics, what was the main problem or tool you focused on?",
+    "looking closer at rag end-to-end & llm api basics, what key trade-offs or design choices did you consider when implementing it?",
+    "design a scalable architecture that incorporates the concepts from prompt engineering fundamentals. what components would you include and why?"
+  ],
+  "last_question_meta": {
+    "day": 12,
+    "topic": "Prompt Engineering Fundamentals",
+    "question_type": "architecture",
+    "difficulty": "hard",
+    "is_follow_up": false
+  },
+  "awaiting_answer": true
+}

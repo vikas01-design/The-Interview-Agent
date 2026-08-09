@@ -1,0 +1,234 @@
+{
+  "session_id": "f9d3da7d-79ce-49a2-ac4d-15adb61a3bae",
+  "candidate": {
+    "member": {
+      "id": "CAND-001",
+      "name": "Sarah Johnson",
+      "jobRole": "Senior Data Engineer",
+      "yearsExperience": 9,
+      "education": "MS Computer Science",
+      "status": "COMPLETED"
+    },
+    "missions": [
+      {
+        "day": 7,
+        "title": "Embeddings Explained",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 8,
+        "title": "Vector Databases Overview",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 10,
+        "title": "Retrieval & Matching Engine",
+        "passed": true,
+        "attempts": 2
+      },
+      {
+        "day": 12,
+        "title": "Prompt Engineering Fundamentals",
+        "passed": true,
+        "attempts": 4
+      },
+      {
+        "day": 16,
+        "title": "Chatbot Backend & API Integration",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 22,
+        "title": "Multi-Agent Orchestration",
+        "passed": true,
+        "attempts": 2
+      },
+      {
+        "day": 23,
+        "title": "Model Context Protocol (MCP)",
+        "passed": true,
+        "attempts": 2
+      },
+      {
+        "day": 28,
+        "title": "Docker & Kubernetes Deployment",
+        "passed": true,
+        "attempts": 3
+      },
+      {
+        "day": 29,
+        "title": "Monitoring, Logging & Observability",
+        "skipped": true
+      },
+      {
+        "day": 31,
+        "title": "Capstone Project & Final Demo",
+        "passed": true,
+        "attempts": 1
+      }
+    ],
+    "signals": {
+      "commitDays": 28,
+      "missionsCompleted": 30,
+      "missionsFirstTry": 20
+    }
+  },
+  "candidate_analysis": {
+    "completed_days": [
+      7,
+      8,
+      10,
+      12,
+      16,
+      22,
+      23,
+      28,
+      31
+    ],
+    "skipped_days": [
+      29
+    ],
+    "failed_days": [],
+    "struggle_days": [
+      12,
+      28
+    ],
+    "strong_days": [
+      7,
+      8,
+      16,
+      31
+    ],
+    "inferred_strengths": [
+      "Day 7: Embeddings Explained",
+      "Day 8: Vector Databases Overview",
+      "Day 16: Chatbot Backend & API Integration",
+      "Day 31: Capstone Project & Final Demo"
+    ],
+    "inferred_weaknesses": [
+      "Day 12: Prompt Engineering Fundamentals",
+      "Day 28: Docker & Kubernetes Deployment",
+      "Skipped Day 29: Monitoring, Logging & Observability"
+    ],
+    "target_days": [
+      12,
+      28,
+      7,
+      8,
+      10,
+      16,
+      22,
+      23,
+      31
+    ]
+  },
+  "status": "active",
+  "question_number": 1,
+  "covered_days": [
+    12
+  ],
+  "covered_topics": [
+    "Prompt Engineering Fundamentals"
+  ],
+  "current_day": 12,
+  "current_topic": "Prompt Engineering Fundamentals",
+  "difficulty": "easy",
+  "follow_up_depth": 0,
+  "pending_follow_up": false,
+  "consecutive_idks_on_topic": 0,
+  "abandoned_days": [],
+  "transcript": [
+    {
+      "role": "interviewer",
+      "content": "Welcome, Sarah Johnson — glad to have you here today. Let's start with something foundational. Can you explain the core idea behind Prompt Engineering Fundamentals? What problem does it solve?",
+      "question_meta": {
+        "day": 12,
+        "topic": "Prompt Engineering Fundamentals",
+        "question_type": "concept",
+        "difficulty": "easy",
+        "is_follow_up": false
+      }
+    }
+  ],
+  "knowledge_model": {
+    "7": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "8": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "10": {
+      "knowledge": 0.55,
+      "depth": 0.55,
+      "reasoning": 0.55,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "12": {
+      "knowledge": 0.45,
+      "depth": 0.45,
+      "reasoning": 0.45,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "16": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "22": {
+      "knowledge": 0.55,
+      "depth": 0.55,
+      "reasoning": 0.55,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "23": {
+      "knowledge": 0.55,
+      "depth": 0.55,
+      "reasoning": 0.55,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "28": {
+      "knowledge": 0.45,
+      "depth": 0.45,
+      "reasoning": 0.45,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "31": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    }
+  },
+  "evaluations": [],
+  "last_evaluation": null,
+  "asked_questions": [
+    "welcome, sarah johnson — glad to have you here today. let's start with something foundational. can you explain the core idea behind prompt engineering fundamentals? what problem does it solve?"
+  ],
+  "last_question_meta": {
+    "day": 12,
+    "topic": "Prompt Engineering Fundamentals",
+    "question_type": "concept",
+    "difficulty": "easy",
+    "is_follow_up": false
+  },
+  "awaiting_answer": true
+}

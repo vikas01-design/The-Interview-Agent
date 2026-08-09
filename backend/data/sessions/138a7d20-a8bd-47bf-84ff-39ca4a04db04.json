@@ -1,0 +1,479 @@
+{
+  "session_id": "138a7d20-a8bd-47bf-84ff-39ca4a04db04",
+  "candidate": {
+    "member": {
+      "id": "CAND-009",
+      "name": "Zara Ahmadi",
+      "jobRole": "AI Engineer",
+      "yearsExperience": 1,
+      "education": "BS Computer Science",
+      "status": "COMPLETED"
+    },
+    "missions": [
+      {
+        "day": 7,
+        "title": "Embeddings Explained",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 8,
+        "title": "Vector Databases Overview",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 10,
+        "title": "Retrieval & Matching Engine",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 12,
+        "title": "Prompt Engineering Fundamentals",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 13,
+        "title": "Function Calling & Structured Outputs",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 21,
+        "title": "LangChain Agents",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 22,
+        "title": "Multi-Agent Orchestration",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 23,
+        "title": "Model Context Protocol (MCP)",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 27,
+        "title": "Security, Privacy & Guardrails",
+        "passed": true,
+        "attempts": 1
+      },
+      {
+        "day": 31,
+        "title": "Capstone Project & Final Demo",
+        "passed": true,
+        "attempts": 1
+      }
+    ],
+    "signals": {
+      "commitDays": 31,
+      "missionsCompleted": 31,
+      "missionsFirstTry": 29
+    }
+  },
+  "candidate_analysis": {
+    "completed_days": [
+      7,
+      8,
+      10,
+      12,
+      13,
+      21,
+      22,
+      23,
+      27,
+      31
+    ],
+    "skipped_days": [],
+    "failed_days": [],
+    "struggle_days": [],
+    "strong_days": [
+      7,
+      8,
+      10,
+      12,
+      13,
+      21,
+      22,
+      23,
+      27,
+      31
+    ],
+    "inferred_strengths": [
+      "Day 7: Embeddings Explained",
+      "Day 8: Vector Databases Overview",
+      "Day 10: The Retrieval & Matching Engine",
+      "Day 12: Prompt Engineering Fundamentals",
+      "Day 13: Advanced Prompting: Function Calling & Structured Outputs"
+    ],
+    "inferred_weaknesses": [],
+    "target_days": [
+      7,
+      8,
+      10,
+      12,
+      13,
+      21,
+      22,
+      23,
+      27,
+      31
+    ]
+  },
+  "status": "active",
+  "question_number": 8,
+  "covered_days": [
+    7,
+    8,
+    10,
+    12
+  ],
+  "covered_topics": [
+    "Embeddings Explained",
+    "Vector Databases Overview",
+    "The Retrieval & Matching Engine",
+    "Prompt Engineering Fundamentals"
+  ],
+  "current_day": 12,
+  "current_topic": "Prompt Engineering Fundamentals",
+  "difficulty": "easy",
+  "follow_up_depth": 1,
+  "pending_follow_up": true,
+  "consecutive_idks_on_topic": 0,
+  "abandoned_days": [],
+  "transcript": [
+    {
+      "role": "interviewer",
+      "content": "Welcome, Zara Ahmadi — glad to have you here today. Let's start with something foundational. Can you explain the core idea behind Embeddings Explained? What problem does it solve?",
+      "question_meta": {
+        "day": 7,
+        "topic": "Embeddings Explained",
+        "question_type": "concept",
+        "difficulty": "hard",
+        "is_follow_up": false
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "AI Mode conversation: explain the core idea behind Embeddings Explained? What problem does it solve?You said: explain the core idea behind Embeddings Explained? What problem does it solve?explain the core idea behind Embeddings Explained? What problem does it solve?The core idea behind Embeddings is to convert complex, real-world data—like words, sentences, or images—into lists of numbers called vectors. These numbers act like GPS coordinates in a \"meaning space,\" placing items with similar meanings or properties close to each other.The Problem It SolvesThe Vocabulary Mismatch Problem: Traditional keyword search looks for exact word matches and fails when two phrases use different words to mean the exact same thing (e.g., \"charged twice\" versus \"duplicate transaction\"). Embeddings map both phrases to nearby coordinates because their meanings match.Computers and Raw Data: Machine learning models and neural networks cannot read raw text, audio, or images; they only understand numbers.Inefficient Data Size: Older methods like one-hot encoding create massive, wasteful lists of zeros and ones that lack any relationship context. Embeddings solve this by using compact, dense vectors that preserve deep semantic relationships while reducing data size.Common Use CasesSemantic Search: Finding results based on the intent and meaning of a query rather than exact keyword matches.Retrieval-Augmented Generation (RAG): Matching user questions with relevant internal documents to help AI systems give accurate answers.Recommendations: Grouping similar user tastes or product attributes to suggest content or items.Would you like to explore how vector databases work with embeddings, or see a simple mathematical example of how words are mapped in space?YouTube·Google Cloud TechWhat are text embeddings?so Jason what are we going to break down in this video well AA. let's go for embeddings. great because sometimes I get asked what ...4mIBMWhat Are Word Embeddings? | IBMThe reason vectors are used to represent words is that most machine learning algorithms, including neural networks, are incapable ...SubstackWhat are Embeddings? - The AI EngineerTL;DR * Embeddings are GPS coordinates for meaning. They convert text (or images, or code) into a list of numbers that represent w...Show allall in one paraThe core idea behind embeddings is to transform complex, real-world data like words, sentences, or images into compact lists of numbers called dense vectors that act as coordinates in a \"meaning space\" where items with similar concepts are placed close together. This mathematical approach solves the fundamental problem that computers cannot process raw data like text or audio directly, while simultaneously overcoming the limitations of traditional keyword search—such as missing synonyms like \"duplicate charge\" and \"billed twice\"—and older, inefficient data formats like one-hot encoding that create massive, wasteful lists of zeros without capturing any relationship context. By converting meaning into precise spatial coordinates, embeddings enable machines to perform advanced tasks like semantic search, content recommendation, and retrieval-augmented generation (RAG) by measuring the actual distance between ideas rather than relying on exact word matches.",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "Explain how ChromaDB fits into the overall Vector Databases Overview workflow.",
+      "question_meta": {
+        "day": 8,
+        "topic": "Vector Databases Overview",
+        "question_type": "explanation",
+        "difficulty": "hard",
+        "is_follow_up": false
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "i dont know",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "No problem at all! Let's approach it from a simpler angle. When you worked with Vector Databases Overview, what was the main problem or tool you focused on?",
+      "question_meta": {
+        "day": 8,
+        "topic": "Vector Databases Overview",
+        "question_type": "concept",
+        "difficulty": "easy",
+        "is_follow_up": false
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "When analyzing Vector Databases Overview, the primary focus is on solving the scalability and speed problem of searching through billions of high-dimensional embeddings. While standard relational databases excel at finding exact matches in tables, they fail when calculating the mathematical distance between millions of complex vectors in real time. Vector databases solve this by utilizing specialized index tools and algorithms—most notably Approximate Nearest Neighbor (ANN) search algorithms like HNSW (Hierarchical Navigable Small World) and IVF-PQ (Inverted File with Product Quantization)—to sacrifice a tiny amount of accuracy for massive gains in retrieval speed. This makes them the foundational infrastructure tool for powering real-time Retrieval-Augmented Generation (RAG) pipelines and large-scale AI recommendation engines.",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "Why is the approach in The Retrieval & Matching Engine preferred over simpler alternatives? What are the specific advantages?",
+      "question_meta": {
+        "day": 10,
+        "topic": "The Retrieval & Matching Engine",
+        "question_type": "why",
+        "difficulty": "hard",
+        "is_follow_up": false
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "The approach in The Retrieval & Matching Engine is preferred over simpler alternatives because traditional keyword search breaks down when handling massive, complex datasets where users search by intent rather than exact words. Simpler keyword methods rely on literal text matching, completely missing relevant results if a user types a synonym or phrases a question uniquely. By dividing the system into a distinct two-stage pipeline—fast retrieval followed by precise matching—it strikes a perfect balance between speed and quality that single-stage systems cannot achieve.",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "What trade-offs would you weigh when making design decisions in Prompt Engineering Fundamentals? Think about performance, cost, and complexity.",
+      "question_meta": {
+        "day": 12,
+        "topic": "Prompt Engineering Fundamentals",
+        "question_type": "tradeoff",
+        "difficulty": "hard",
+        "is_follow_up": false
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "i do not have any prior experience about this topic",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "Looking closer at Prompt Engineering Fundamentals, what key trade-offs or design choices did you consider when implementing it?",
+      "question_meta": {
+        "day": 12,
+        "topic": "Prompt Engineering Fundamentals",
+        "question_type": "follow_up",
+        "difficulty": "hard",
+        "is_follow_up": true
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "i dont know",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "No problem at all! Let's approach it from a simpler angle. When you worked with Prompt Engineering Fundamentals, what was the main problem or tool you focused on?",
+      "question_meta": {
+        "day": 12,
+        "topic": "Prompt Engineering Fundamentals",
+        "question_type": "concept",
+        "difficulty": "easy",
+        "is_follow_up": false
+      }
+    },
+    {
+      "role": "candidate",
+      "content": "change the topic i dont know about this topic",
+      "question_meta": null
+    },
+    {
+      "role": "interviewer",
+      "content": "Looking closer at Prompt Engineering Fundamentals, what key trade-offs or design choices did you consider when implementing it?",
+      "question_meta": {
+        "day": 12,
+        "topic": "Prompt Engineering Fundamentals",
+        "question_type": "follow_up",
+        "difficulty": "easy",
+        "is_follow_up": true
+      }
+    }
+  ],
+  "knowledge_model": {
+    "7": {
+      "knowledge": 0.71,
+      "depth": 0.69,
+      "reasoning": 0.69,
+      "evidence": [
+        "Provided a detailed response covering multiple aspects"
+      ],
+      "misconceptions": []
+    },
+    "8": {
+      "knowledge": 0.554,
+      "depth": 0.534,
+      "reasoning": 0.534,
+      "evidence": [
+        "Provided a detailed response covering multiple aspects"
+      ],
+      "misconceptions": []
+    },
+    "10": {
+      "knowledge": 0.71,
+      "depth": 0.69,
+      "reasoning": 0.69,
+      "evidence": [
+        "Provided a detailed response covering multiple aspects"
+      ],
+      "misconceptions": []
+    },
+    "12": {
+      "knowledge": 0.431,
+      "depth": 0.376,
+      "reasoning": 0.376,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "13": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "21": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "22": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "23": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "27": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    },
+    "31": {
+      "knowledge": 0.75,
+      "depth": 0.75,
+      "reasoning": 0.75,
+      "evidence": [],
+      "misconceptions": []
+    }
+  },
+  "evaluations": [
+    {
+      "score": 6.5,
+      "correctness": 0.65,
+      "depth": 0.6,
+      "clarity": 0.7,
+      "reasoning": 0.6,
+      "strengths": [
+        "Provided a detailed response covering multiple aspects"
+      ],
+      "misconceptions": [],
+      "missing_concepts": [],
+      "recommended_followup": null,
+      "candidate_claims": []
+    },
+    {
+      "score": 2.0,
+      "correctness": 0.1,
+      "depth": 0.1,
+      "clarity": 0.5,
+      "reasoning": 0.1,
+      "strengths": [],
+      "misconceptions": [],
+      "missing_concepts": [
+        "foundational understanding of the topic"
+      ],
+      "recommended_followup": "foundational concept — ask a simpler version",
+      "candidate_claims": []
+    },
+    {
+      "score": 6.5,
+      "correctness": 0.65,
+      "depth": 0.6,
+      "clarity": 0.7,
+      "reasoning": 0.6,
+      "strengths": [
+        "Provided a detailed response covering multiple aspects"
+      ],
+      "misconceptions": [],
+      "missing_concepts": [],
+      "recommended_followup": null,
+      "candidate_claims": []
+    },
+    {
+      "score": 6.5,
+      "correctness": 0.65,
+      "depth": 0.6,
+      "clarity": 0.7,
+      "reasoning": 0.6,
+      "strengths": [
+        "Provided a detailed response covering multiple aspects"
+      ],
+      "misconceptions": [],
+      "missing_concepts": [],
+      "recommended_followup": null,
+      "candidate_claims": []
+    },
+    {
+      "score": 4.5,
+      "correctness": 0.45,
+      "depth": 0.35,
+      "clarity": 0.55,
+      "reasoning": 0.35,
+      "strengths": [],
+      "misconceptions": [],
+      "missing_concepts": [],
+      "recommended_followup": "clarification of key points",
+      "candidate_claims": []
+    },
+    {
+      "score": 2.0,
+      "correctness": 0.1,
+      "depth": 0.1,
+      "clarity": 0.5,
+      "reasoning": 0.1,
+      "strengths": [],
+      "misconceptions": [],
+      "missing_concepts": [
+        "foundational understanding of the topic"
+      ],
+      "recommended_followup": "foundational concept — ask a simpler version",
+      "candidate_claims": []
+    },
+    {
+      "score": 4.5,
+      "correctness": 0.45,
+      "depth": 0.35,
+      "clarity": 0.55,
+      "reasoning": 0.35,
+      "strengths": [],
+      "misconceptions": [],
+      "missing_concepts": [],
+      "recommended_followup": "clarification of key points",
+      "candidate_claims": []
+    }
+  ],
+  "last_evaluation": {
+    "score": 4.5,
+    "correctness": 0.45,
+    "depth": 0.35,
+    "clarity": 0.55,
+    "reasoning": 0.35,
+    "strengths": [],
+    "misconceptions": [],
+    "missing_concepts": [],
+    "recommended_followup": "clarification of key points",
+    "candidate_claims": []
+  },
+  "asked_questions": [
+    "welcome, zara ahmadi — glad to have you here today. let's start with something foundational. can you explain the core idea behind embeddings explained? what problem does it solve?",
+    "explain how chromadb fits into the overall vector databases overview workflow.",
+    "no problem at all! let's approach it from a simpler angle. when you worked with vector databases overview, what was the main problem or tool you focused on?",
+    "why is the approach in the retrieval & matching engine preferred over simpler alternatives? what are the specific advantages?",
+    "what trade-offs would you weigh when making design decisions in prompt engineering fundamentals? think about performance, cost, and complexity.",
+    "looking closer at prompt engineering fundamentals, what key trade-offs or design choices did you consider when implementing it?",
+    "no problem at all! let's approach it from a simpler angle. when you worked with prompt engineering fundamentals, what was the main problem or tool you focused on?",
+    "looking closer at prompt engineering fundamentals, what key trade-offs or design choices did you consider when implementing it?"
+  ],
+  "last_question_meta": {
+    "day": 12,
+    "topic": "Prompt Engineering Fundamentals",
+    "question_type": "follow_up",
+    "difficulty": "easy",
+    "is_follow_up": true
+  },
+  "awaiting_answer": true
+}
