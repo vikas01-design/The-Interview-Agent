@@ -3,6 +3,7 @@ import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@cl
 import { NeuCard } from '../neu/NeuCard'
 import { NeuButton } from '../neu/NeuButton'
 import { NeuBadge } from '../neu/NeuBadge'
+import { NeoBrutalCharacter } from '../neu/NeoBrutalCharacter'
 
 interface LandingPageProps {
   onEnterDashboard: () => void
@@ -145,6 +146,19 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
               TRY ROLE-AWARE RESUME AI ⚡
             </NeuButton>
           </div>
+        </div>
+
+        {/* Neo-Brutalist Character & Emotion Shuttle Showcase Section */}
+        <div id="interviewer" className="max-w-5xl mx-auto space-y-4 pt-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b-3 border-black pb-2 font-mono">
+            <div className="flex items-center gap-2">
+              <span className="bg-black text-[#F7CB46] px-2 py-0.5 font-black text-xs">AI INTERVIEWER PERSONA</span>
+              <span className="font-black text-xs uppercase">MINIMALIST CARTOON ART & LIVE EMOTION ENGINE</span>
+            </div>
+            <NeuBadge variant="pink" className="animate-pulse">● LIVE EMOTION SHUTTLE</NeuBadge>
+          </div>
+
+          <NeoBrutalCharacter initialEmotion="asking" showControls={true} />
         </div>
 
         {/* Hero Interactive Console Preview Card with Animated Typing & Live Signal Meters */}

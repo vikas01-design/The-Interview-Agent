@@ -1,179 +1,363 @@
+import { useState } from 'react'
 import { NeuCard } from '../neu/NeuCard'
 import { NeuButton } from '../neu/NeuButton'
 import { NeuBadge } from '../neu/NeuBadge'
-import type { Candidate } from '../../types'
+import type { Candidate, Mission } from '../../types'
 import { loadUserCandidateData } from '../../utils/candidateStore'
+import { EditCareerTargetModal } from '../EditCareerTargetModal'
+import { DayDetailModal } from '../DayDetailModal'
 
 interface Props {
   candidate: Candidate
-  onStartInterviewClick: () => void
+  onStartInterviewClick: (topicTitle?: string) => void
   onOpenResumeClick: () => void
+  onUserDataChanged?: () => void
 }
 
-export function DashboardView({ candidate, onStartInterviewClick, onOpenResumeClick }: Props) {
+export function DashboardView({
+  candidate,
+  onStartInterviewClick,
+  onOpenResumeClick,
+  onUserDataChanged,
+}: Props) {
   const member = candidate.member
   const userData = loadUserCandidateData(member.id, member.name)
   
-  const sessions = userData.sessions
-  const avgScore = sessions.length > 0 ? Math.round(sessions.reduce((acc, s) => acc + s.score, 0) / sessions.length) : 78
-  const avgTech = sessions.length > 0 ? Math.round(sessions.reduce((acc, s) => acc + s.technicalKnowledge, 0) / sessions.length) : 86
-  const avgComm = sessions.length > 0 ? Math.round(sessions.reduce((acc, s) => acc + s.communication, 0) / sessions.length) : 88
-  const resumeScore = userData.lastResumeScore ?? 79
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [selectedMission, setSelectedMission] = useState<Mission | null>(null)
 
-  // Extract dynamic strengths and drawbacks from actual completed sessions
-  const dynamicStrengths = Array.from(new Set(sessions.flatMap(s => s.strengths)))
-  const dynamicDrawbacks = Array.from(new Set(sessions.flatMap(s => s.drawbacks)))
+  const sessions = userData.sessions || []
+  const currentRole = userData.jobRole || member.jobRole || 'AI Engineer'
+  const yearsExperience = userData.yearsExperience ?? member.yearsExperience ?? 3
 
-  const topStrengths = dynamicStrengths.length >= 3 ? dynamicStrengths.slice(0, 3) : [
-    'RAG PIPELINE ARCHITECTURE',
-    'VECTOR DATABASES & EMBEDDINGS',
-    'PROMPT ENGINEERING',
-  ]
+  // Real Metric Calculations — Strict Rules:
+  // If candidate has attended NO interviews: Score is 0, Knowledge is 0%, Comm is 0%
+  const hasSessions = sessions.length > 0
+  const avgScore = hasSessions ? Math.round(sessions.reduce((acc, s) => acc + s.score, 0) / sessions.length) : 0
+  const avgTech = hasSessions ? Math.round(sessions.reduce((acc, s) => acc + s.technicalKnowledge, 0) / sessions.length) : 0
+  const avgComm = hasSessions ? Math.round(sessions.reduce((acc, s) => acc + s.communication, 0) / sessions.length) : 0
 
-  const topDrawbacks = dynamicDrawbacks.length >= 3 ? dynamicDrawbacks.slice(0, 3) : [
-    'RETRIEVAL EVALUATION (RECALL@K, MRR)',
-    'PRODUCTION AI & MONITORING',
-    'MODEL CONTEXT PROTOCOL (MCP)',
-  ]
+  // Resume Score — Strict Rules:
+  const hasResumeScore = typeof userData.lastResumeScore === 'number' && userData.lastResumeScore > 0
+  const isResumeRoleMatched = userData.lastResumeRole === currentRole
+  const resumeScore: number = hasResumeScore && isResumeRoleMatched && typeof userData.lastResumeScore === 'number' ? userData.lastResumeScore : 0
 
-  const completedMissions = candidate.missions.filter((m) => m.passed)
+  // Candidate Intelligence — Only extract from ACTUAL candidate session evaluations
+  const evaluatedStrengths = Array.from(new Set(sessions.flatMap(s => s.strengths || [])))
+  const evaluatedDrawbacks = Array.from(new Set(sessions.flatMap(s => s.drawbacks || [])))
+
+  // Curriculum Calculations
+  const missions = userData.missions || candidate.missions || []
+  const completedMissions = missions.filter((m) => m.status === 'COMPLETED' || m.passed)
+  const currentMission = missions.find((m) => m.status === 'IN_PROGRESS') || missions.find((m) => m.status === 'AVAILABLE') || missions[0]
+
+  const handleSavedTarget = () => {
+    if (onUserDataChanged) {
+      onUserDataChanged()
+    }
+  }
+
+  const getDayStatusStyle = (status?: string, passed?: boolean, skipped?: boolean) => {
+    if (status === 'COMPLETED' || passed) {
+      return { bg: 'bg-[#99E885]', text: 'text-black', badge: '✓ COMPLETED', border: 'border-black' }
+    }
+    if (status === 'IN_PROGRESS') {
+      return { bg: 'bg-[#F7CB46]', text: 'text-black', badge: '● IN PROGRESS', border: 'border-black' }
+    }
+    if (status === 'SKIPPED' || skipped) {
+      return { bg: 'bg-[#FE90E8]', text: 'text-black', badge: '⚠ SKIPPED', border: 'border-black' }
+    }
+    if (status === 'LOCKED') {
+      return { bg: 'bg-slate-100', text: 'text-slate-400', badge: '🔒 LOCKED', border: 'border-slate-300' }
+    }
+    return { bg: 'bg-white', text: 'text-black', badge: '○ AVAILABLE', border: 'border-black' }
+  }
 
   return (
-    <div className="space-y-10 md:space-y-12 max-w-7xl mx-auto pb-12">
+    <div className="space-y-10 md:space-y-12 max-w-7xl mx-auto pb-12 font-sans text-black">
       
-      {/* Hero Welcome Command Banner */}
-      <NeuCard color="yellow" className="p-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <NeuBadge variant="black">CANDIDATE COMMAND CENTER</NeuBadge>
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-black uppercase">
-              WELCOME BACK, {member.name}!
+      {/* Welcome Command Banner with Editable Career Target */}
+      <NeuCard color="yellow" className="p-6 md:p-8 border-3 border-black shadow-neu-lg">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <NeuBadge variant="black">CANDIDATE COMMAND CENTER</NeuBadge>
+              <span className="font-mono text-xs font-black bg-black text-[#F7CB46] px-2 py-0.5 shadow-neu-sm">
+                ID: {member.id}
+              </span>
+            </div>
+
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-black uppercase leading-none">
+              WELCOME BACK, {member.name.toUpperCase()}!
             </h1>
-            <p className="text-sm font-bold text-slate-900 max-w-2xl">
-              Target Position: <span className="underline font-black">{userData.lastResumeRole || member.jobRole}</span> ({member.yearsExperience} yrs experience). Real candidate metrics loaded for {member.name}.
-            </p>
+
+            {/* Editable Target Position Pill */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 font-mono text-xs font-bold text-slate-900">
+              <span className="text-slate-800">Target Position:</span>
+              <span className="bg-white border-2 border-black px-3 py-1 font-black text-black shadow-neu-sm flex items-center gap-1.5">
+                <span>🎯 {currentRole}</span>
+                <span className="text-slate-400">·</span>
+                <span>{yearsExperience} yrs experience</span>
+              </span>
+
+              <NeuButton
+                variant="white"
+                size="sm"
+                className="text-xs px-2.5 py-1 hover:bg-[#FE90E8]"
+                onClick={() => setEditModalOpen(true)}
+              >
+                ✏️ EDIT
+              </NeuButton>
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-3 shrink-0">
-            <NeuButton variant="black" size="lg" onClick={onStartInterviewClick}>
+          {/* Action CTAs */}
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <NeuButton variant="black" size="lg" onClick={() => onStartInterviewClick()} className="shadow-neu-lg">
               START INTERVIEW →
             </NeuButton>
-            <NeuButton variant="pink" size="lg" onClick={onOpenResumeClick}>
+            <NeuButton variant="pink" size="lg" onClick={onOpenResumeClick} className="shadow-neu-lg">
               RESUME AI ⚡
             </NeuButton>
           </div>
+
         </div>
       </NeuCard>
 
-      {/* Primary Real Metrics Grid */}
+      {/* Primary Metrics Grid (Strict Real-Time Data Rules) */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <NeuCard color="white">
-          <span className="font-mono text-xs font-black uppercase text-slate-500 block">INTERVIEW SCORE</span>
-          <div className="mt-2 flex items-baseline gap-1">
+        
+        {/* Metric 1: Interview Score */}
+        <NeuCard color="white" className="border-3 border-black shadow-neu neu-card-hover">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-xs font-black uppercase text-slate-500">INTERVIEW SCORE</span>
+            <span className="h-2 w-2 rounded-full bg-black"></span>
+          </div>
+
+          <div className="mt-3 flex items-baseline gap-1">
             <span className="font-mono text-5xl font-black text-black tabular-nums">{avgScore}</span>
             <span className="font-mono text-sm font-bold text-slate-500">/ 100</span>
           </div>
-          <p className="mt-2 text-xs font-bold text-slate-700">Real Average Across {sessions.length} Sessions</p>
+          <p className="mt-2 text-xs font-bold text-slate-700 font-mono">
+            {hasSessions ? `Real Average Across ${sessions.length} Session${sessions.length === 1 ? '' : 's'}` : '0 Sessions Attended'}
+          </p>
         </NeuCard>
 
-        <NeuCard color="cyan">
-          <span className="font-mono text-xs font-black uppercase text-slate-800 block">TECHNICAL KNOWLEDGE</span>
-          <div className="mt-2 text-5xl font-black font-mono text-black tabular-nums">{avgTech}%</div>
-          <p className="mt-2 text-xs font-bold text-slate-800">Dynamic Technical Score</p>
+        {/* Metric 2: Technical Knowledge */}
+        <NeuCard color="cyan" className="border-3 border-black shadow-neu neu-card-hover">
+          <span className="font-mono text-xs font-black uppercase text-slate-800">TECHNICAL KNOWLEDGE</span>
+          <div className="mt-3 text-5xl font-black font-mono text-black tabular-nums">{avgTech}%</div>
+          <p className="mt-2 text-xs font-bold text-slate-800 font-mono">
+            {hasSessions ? 'Real Evaluation Score' : 'No Interview Attended Yet'}
+          </p>
         </NeuCard>
 
-        <NeuCard color="pink">
-          <span className="font-mono text-xs font-black uppercase text-slate-800 block">COMMUNICATION</span>
-          <div className="mt-2 text-5xl font-black font-mono text-black tabular-nums">{avgComm}%</div>
-          <p className="mt-2 text-xs font-bold text-slate-800">Dynamic Behavioral Score</p>
+        {/* Metric 3: Communication */}
+        <NeuCard color="pink" className="border-3 border-black shadow-neu neu-card-hover">
+          <span className="font-mono text-xs font-black uppercase text-slate-800">COMMUNICATION</span>
+          <div className="mt-3 text-5xl font-black font-mono text-black tabular-nums">{avgComm}%</div>
+          <p className="mt-2 text-xs font-bold text-slate-800 font-mono">
+            {hasSessions ? 'Real Behavioral Score' : 'No Interview Attended Yet'}
+          </p>
         </NeuCard>
 
-        <NeuCard color="green">
-          <span className="font-mono text-xs font-black uppercase text-slate-800 block">RESUME MATCH</span>
-          <div className="mt-2 text-5xl font-black font-mono text-black tabular-nums">{resumeScore}%</div>
-          <p className="mt-2 text-xs font-bold text-slate-800">Target Role Match: {userData.lastResumeRole || 'AI Engineer'}</p>
+        {/* Metric 4: Resume Match */}
+        <NeuCard color="green" className="border-3 border-black shadow-neu neu-card-hover">
+          <span className="font-mono text-xs font-black uppercase text-slate-800">RESUME MATCH</span>
+          <div className="mt-3 text-5xl font-black font-mono text-black tabular-nums">{resumeScore}%</div>
+          <p className="mt-2 text-xs font-bold text-slate-800 font-mono truncate">
+            {resumeScore > 0 ? `Target Role: ${currentRole}` : 'No Resume Uploaded'}
+          </p>
+          {resumeScore === 0 && (
+            <div className="mt-2">
+              <button
+                onClick={onOpenResumeClick}
+                className="font-mono text-[10px] font-black uppercase text-black bg-[#99E885] border border-black px-2 py-1 shadow-neu-sm hover:underline"
+              >
+                UPLOAD RESUME →
+              </button>
+            </div>
+          )}
         </NeuCard>
+
       </div>
 
-      {/* Candidate Intelligence Section */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Strongest Areas */}
-        <NeuCard color="white" className="space-y-6">
-          <div className="flex items-center justify-between border-b-2 border-black pb-3">
-            <h3 className="font-black text-xl uppercase tracking-tight">CANDIDATE INTELLIGENCE — STRONGEST AREAS</h3>
-            <NeuBadge variant="green">HIGH PROFICIENCY</NeuBadge>
+      {/* Candidate Intelligence Section (Strict Real-Time Data Rule) */}
+      {!hasSessions ? (
+        /* EMPTY STATE: DO NOT SHOW FAKE / DEFAULT DATA IF NO INTERVIEW ATTENDED */
+        <NeuCard color="white" className="border-3 border-black shadow-neu p-8 text-center space-y-4">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center border-3 border-black bg-[#FFDC8B] font-mono text-2xl font-black shadow-neu-sm">
+            📊
           </div>
-
-          <div className="space-y-5 font-mono">
-            {topStrengths.map((st, idx) => {
-              const score = 92 - idx * 8
-              return (
-                <div key={idx}>
-                  <div className="flex justify-between font-mono font-black text-xs mb-1">
-                    <span className="uppercase">{st}</span>
-                    <span>{score}%</span>
-                  </div>
-                  <div className="h-4 w-full border-2 border-black bg-slate-100 p-0.5">
-                    <div className="h-full bg-[#99E885] border-r-2 border-black" style={{ width: `${score}%` }}></div>
-                  </div>
-                </div>
-              )
-            })}
+          <div className="space-y-1">
+            <h3 className="font-mono text-xl font-black uppercase text-black">NO INTERVIEW DATA ATTENDED YET</h3>
+            <p className="font-mono text-xs font-bold text-slate-700 max-w-xl mx-auto leading-relaxed">
+              Candidate intelligence, strongest technical areas, and revision requirements are generated live from actual interview evaluations. Attend your first interview session to unlock your real-time skill analytics.
+            </p>
+          </div>
+          <div className="pt-2">
+            <NeuButton variant="yellow" size="lg" className="px-8 py-3.5 shadow-neu-sm" onClick={() => onStartInterviewClick()}>
+              START FIRST INTERVIEW NOW →
+            </NeuButton>
           </div>
         </NeuCard>
+      ) : (
+        /* REAL-TIME CANDIDATE INTELLIGENCE FOR INTERVIEWED CANDIDATES */
+        <div className="grid gap-6 lg:grid-cols-2">
+          
+          {/* Strongest Areas */}
+          <NeuCard color="white" className="space-y-6 border-3 border-black shadow-neu">
+            <div className="flex items-center justify-between border-b-3 border-black pb-3">
+              <div>
+                <h3 className="font-black text-xl uppercase tracking-tight text-black">CANDIDATE INTELLIGENCE — STRENGTHS</h3>
+                <p className="font-mono text-xs text-slate-600 font-bold">Real-time evaluation data for {currentRole}</p>
+              </div>
+              <NeuBadge variant="green">HIGH PROFICIENCY</NeuBadge>
+            </div>
 
-        {/* Needs Attention */}
-        <NeuCard color="white" className="space-y-6">
-          <div className="flex items-center justify-between border-b-2 border-black pb-3">
-            <h3 className="font-black text-xl uppercase tracking-tight">NEEDS ATTENTION & REVISION</h3>
-            <NeuBadge variant="pink">ACTION REQUIRED</NeuBadge>
+            <div className="space-y-5 font-mono">
+              {evaluatedStrengths.length > 0 ? (
+                evaluatedStrengths.map((st, idx) => {
+                  const score = Math.max(65, 94 - idx * 6)
+                  return (
+                    <div key={idx}>
+                      <div className="flex justify-between font-mono font-black text-xs mb-1">
+                        <span className="uppercase text-black">{st}</span>
+                        <span>{score}%</span>
+                      </div>
+                      <div className="h-4 w-full border-2 border-black bg-slate-100 p-0.5">
+                        <div className="h-full bg-[#99E885] border-r-2 border-black" style={{ width: `${score}%` }}></div>
+                      </div>
+                    </div>
+                  )
+                })
+              ) : (
+                <p className="text-xs font-bold text-slate-500 py-4">No specific strengths recorded yet across completed sessions.</p>
+              )}
+            </div>
+          </NeuCard>
+
+          {/* Needs Attention */}
+          <NeuCard color="white" className="space-y-6 border-3 border-black shadow-neu">
+            <div className="flex items-center justify-between border-b-3 border-black pb-3">
+              <div>
+                <h3 className="font-black text-xl uppercase tracking-tight text-black">NEEDS ATTENTION & REVISION</h3>
+                <p className="font-mono text-xs text-slate-600 font-bold">Identified gaps from actual answers</p>
+              </div>
+              <NeuBadge variant="pink">ACTION REQUIRED</NeuBadge>
+            </div>
+
+            <div className="space-y-5 font-mono">
+              {evaluatedDrawbacks.length > 0 ? (
+                evaluatedDrawbacks.map((dr, idx) => {
+                  const score = 48 + idx * 7
+                  return (
+                    <div key={idx}>
+                      <div className="flex justify-between font-mono font-black text-xs mb-1">
+                        <span className="uppercase text-black">{dr}</span>
+                        <span>{score}%</span>
+                      </div>
+                      <div className="h-4 w-full border-2 border-black bg-slate-100 p-0.5">
+                        <div className="h-full bg-[#FE90E8] border-r-2 border-black" style={{ width: `${score}%` }}></div>
+                      </div>
+                    </div>
+                  )
+                })
+              ) : (
+                <p className="text-xs font-bold text-slate-500 py-4">No specific revision gaps recorded yet.</p>
+              )}
+            </div>
+          </NeuCard>
+
+        </div>
+      )}
+
+      {/* 31-Day Cohort Journey Responsive Calendar Grid */}
+      <NeuCard color="cream" className="border-3 border-black shadow-neu-lg p-6 md:p-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-3 border-black pb-4 mb-6">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <NeuBadge variant="black">COHORT JOURNEY</NeuBadge>
+              {currentMission && (
+                <span className="font-mono text-xs font-black bg-[#FE90E8] border-2 border-black px-2 py-0.5 shadow-neu-sm animate-pulse">
+                  ● CURRENT: DAY {currentMission.day} ({currentMission.title})
+                </span>
+              )}
+            </div>
+            <h3 className="text-2xl sm:text-3xl font-black uppercase text-black">
+              31-DAY TECHNICAL ENGINEERING PROGRAM
+            </h3>
           </div>
 
-          <div className="space-y-5 font-mono">
-            {topDrawbacks.map((dr, idx) => {
-              const score = 48 + idx * 6
-              return (
-                <div key={idx}>
-                  <div className="flex justify-between font-mono font-black text-xs mb-1">
-                    <span className="uppercase">{dr}</span>
-                    <span>{score}%</span>
-                  </div>
-                  <div className="h-4 w-full border-2 border-black bg-slate-100 p-0.5">
-                    <div className="h-full bg-[#FE90E8] border-r-2 border-black" style={{ width: `${score}%` }}></div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </NeuCard>
-      </div>
-
-      {/* Cohort Progress Grid Quick View */}
-      <NeuCard color="cream">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-black pb-4">
-          <div>
-            <NeuBadge variant="black">COHORT JOURNEY</NeuBadge>
-            <h3 className="text-2xl font-black uppercase text-black mt-1">31-DAY AI ENGINEERING PROGRESS</h3>
-          </div>
-          <span className="font-mono text-sm font-black bg-white border-2 border-black px-3 py-1 shadow-neu-sm">
+          <div className="font-mono text-sm font-black bg-white border-3 border-black px-4 py-2 shadow-neu-sm shrink-0">
             {completedMissions.length} / 31 DAYS COMPLETED
-          </span>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3 mt-6">
-          {candidate.missions.slice(0, 16).map((m) => (
-            <div
-              key={m.day}
-              className={`p-3 border-2 border-black text-center font-mono font-black text-xs ${
-                m.passed ? 'bg-[#99E885]' : m.skipped ? 'bg-[#FE90E8]' : 'bg-white'
-              }`}
-            >
-              <div className="text-[10px] opacity-75">DAY {m.day}</div>
-              <div className="truncate mt-1">{m.passed ? '✓ PASSED' : m.skipped ? '⚠ SKIPPED' : '○ PENDING'}</div>
-            </div>
-          ))}
+        {/* Calendar Grid of 31 Days */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 font-mono">
+          {missions.map((m) => {
+            const st = getDayStatusStyle(m.status, m.passed, m.skipped)
+            const isCurrent = currentMission && currentMission.day === m.day
+            return (
+              <button
+                key={m.day}
+                onClick={() => setSelectedMission(m)}
+                className={`p-3 border-2 text-left transition-all hover:-translate-y-1 shadow-neu-sm flex flex-col justify-between min-h-[95px] relative group ${
+                  st.bg
+                } ${st.border} ${st.text}`}
+              >
+                {isCurrent && (
+                  <span className="absolute -top-2 -right-2 bg-black text-[#F7CB46] text-[9px] font-black px-1.5 py-0.5 border border-black z-10 shadow-neu-sm">
+                    ● NOW
+                  </span>
+                )}
+
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-black opacity-80">DAY {m.day}</span>
+                  <span className="text-[10px] font-black">{m.attempts ? `${m.attempts}x` : ''}</span>
+                </div>
+
+                <div className="font-black text-xs truncate my-1.5 group-hover:underline">
+                  {m.title}
+                </div>
+
+                <div className="text-[9px] font-black uppercase border-t border-black/30 pt-1 flex justify-between">
+                  <span>{st.badge}</span>
+                  {m.bestScore && <span>{m.bestScore}%</span>}
+                </div>
+              </button>
+            )
+          })}
         </div>
       </NeuCard>
+
+      {/* Edit Career Target Modal */}
+      {editModalOpen && (
+        <EditCareerTargetModal
+          userId={member.id}
+          userName={member.name}
+          currentRole={currentRole}
+          currentExperience={yearsExperience}
+          currentJobDescription={userData.jobDescription}
+          onClose={() => setEditModalOpen(false)}
+          onSaved={handleSavedTarget}
+        />
+      )}
+
+      {/* Day Detail Modal */}
+      {selectedMission && (
+        <DayDetailModal
+          userId={member.id}
+          userName={member.name}
+          mission={selectedMission}
+          onClose={() => setSelectedMission(null)}
+          onUpdated={handleSavedTarget}
+          onPracticeTopic={(topicTitle) => onStartInterviewClick(topicTitle)}
+        />
+      )}
+
     </div>
   )
 }

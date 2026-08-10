@@ -51,7 +51,9 @@ function App() {
       .finally(() => setLoading(false))
   }, [])
 
-  // Load real persistent data for the logged-in candidate user
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  // Load real persistent data for the logged-in candidate user (scoped by user ID)
   const userId = user?.id || 'guest_candidate'
   const candidateName = user?.fullName || user?.firstName || (user?.primaryEmailAddress?.emailAddress ? user.primaryEmailAddress.emailAddress.split('@')[0] : 'Candidate User')
   const userEmail = user?.primaryEmailAddress?.emailAddress
@@ -391,9 +393,11 @@ function App() {
         <main className="flex-1 overflow-y-auto bg-dot-pattern p-6 md:p-10 lg:p-12">
           {activeView === 'dashboard' && (
             <DashboardView
+              key={refreshKey}
               candidate={activeCandidate}
               onStartInterviewClick={() => setActiveView('config')}
               onOpenResumeClick={() => setResumeModalOpen(true)}
+              onUserDataChanged={() => setRefreshKey((prev) => prev + 1)}
             />
           )}
 

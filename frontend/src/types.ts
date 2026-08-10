@@ -7,12 +7,21 @@ export interface CandidateMember {
   status: string
 }
 
+export type MissionStatus = 'LOCKED' | 'AVAILABLE' | 'IN_PROGRESS' | 'COMPLETED' | 'SKIPPED' | 'FAILED'
+
 export interface Mission {
   day: number
+  module: string
   title: string
+  topics: string[]
+  learningObjectives: string[]
+  tools: string[]
+  status: MissionStatus
   passed?: boolean
   skipped?: boolean
   attempts?: number
+  bestScore?: number
+  completionDate?: string
 }
 
 export interface CandidateSignals {

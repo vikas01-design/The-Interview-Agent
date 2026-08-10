@@ -1,4 +1,4 @@
-import type { Candidate, Feedback, Mission } from '../types'
+import type { Candidate, Feedback, Mission, MissionStatus } from '../types'
 
 export interface SavedSession {
   id: string
@@ -19,63 +19,311 @@ export interface UserCandidateData {
   email?: string
   jobRole: string
   yearsExperience: number
+  jobDescription?: string
   education: string
   sessions: SavedSession[]
   lastResumeScore: number | null
   lastResumeRole: string | null
+  lastResumeDate?: string | null
   missions: Mission[]
+  profileCreatedAt?: string
+  updatedAt?: string
 }
 
-const DEFAULT_MISSIONS: Mission[] = Array.from({ length: 31 }, (_, i) => {
-  const day = i + 1
-  const passedDays = [1, 2, 3, 5, 7, 8, 10, 12, 14]
+// Full 31-Day AI & Tech Engineering Curriculum Dataset
+const CURRICULUM_DATA: Omit<Mission, 'passed' | 'skipped' | 'attempts' | 'status'>[] = [
+  {
+    day: 1,
+    module: 'Foundations & Data Structures',
+    title: 'Python Memory & Data Structures Refresher',
+    topics: ['Lists vs Tuples', 'Dict Hashing', 'Time Complexity', 'Memory Profiling'],
+    learningObjectives: ['Master O(1) hash lookups', 'Optimize Python memory usage', 'Analyze algorithm trade-offs'],
+    tools: ['Python 3.11', 'sys.getsizeof', 'cProfile'],
+  },
+  {
+    day: 2,
+    module: 'LLMs & Prompting',
+    title: 'LLM API Integration & Advanced Prompting',
+    topics: ['Structured Output', 'Few-Shot Learning', 'System Prompts', 'Rate Limiting'],
+    learningObjectives: ['Design robust JSON schemas', 'Implement retry backoff logic', 'Prevent prompt drift'],
+    tools: ['OpenAI SDK', 'Pydantic', 'Tenacity'],
+  },
+  {
+    day: 3,
+    module: 'Embeddings & Tokenization',
+    title: 'Tokenization & Embeddings Deep Dive',
+    topics: ['BPE Tokenization', 'Cosine Similarity', 'Dense Embeddings', 'Dimensionality'],
+    learningObjectives: ['Calculate vector distances', 'Handle token context limits', 'Compare embedding models'],
+    tools: ['Tiktoken', 'Sentence-Transformers', 'NumPy'],
+  },
+  {
+    day: 4,
+    module: 'Vector Databases',
+    title: 'Vector Database Fundamentals (ChromaDB)',
+    topics: ['Vector Indexes', 'Distance Metrics', 'Metadata Filtering', 'Collection Design'],
+    learningObjectives: ['Setup local vector DB', 'Perform similarity search', 'Apply payload filters'],
+    tools: ['ChromaDB', 'Python API'],
+  },
+  {
+    day: 5,
+    module: 'RAG Architecture',
+    title: 'RAG Pipeline Construction from Scratch',
+    topics: ['Naive RAG', 'Context Assembly', 'Citation Tracking', 'Hallucination Checks'],
+    learningObjectives: ['Build end-to-end RAG', 'Format augmented prompts', 'Ensure source attribution'],
+    tools: ['Python', 'ChromaDB', 'OpenAI'],
+  },
+  {
+    day: 6,
+    module: 'RAG Architecture',
+    title: 'Chunking Strategies & Document Loaders',
+    topics: ['Recursive Chunking', 'Semantic Chunking', 'Overlap Optimization', 'PDF Parsing'],
+    learningObjectives: ['Evaluate chunk sizes vs latency', 'Extract structured text', 'Preserve table layout'],
+    tools: ['LangChain TextSplitters', 'PyPDF', 'Unstructured'],
+  },
+  {
+    day: 7,
+    module: 'RAG Evaluation',
+    title: 'Retrieval Evaluation (Recall@K, MRR)',
+    topics: ['Recall@K', 'Mean Reciprocal Rank', 'Precision@K', 'Golden Datasets'],
+    learningObjectives: ['Measure retrieval accuracy', 'Generate evaluation datasets', 'Tune similarity thresholds'],
+    tools: ['Ragas', 'Evaluation Datasets', 'Pandas'],
+  },
+  {
+    day: 8,
+    module: 'Search Optimization',
+    title: 'Semantic Search & Hybrid Keyword Search',
+    topics: ['BM25 Keyword Search', 'Hybrid RRF Reciprocal Rank', 'Sparse Vectors'],
+    learningObjectives: ['Combine keyword and vector search', 'Balance precision & recall'],
+    tools: ['BM25Okapi', 'Qdrant / Elasticsearch'],
+  },
+  {
+    day: 9,
+    module: 'Search Optimization',
+    title: 'Reranking Models & Cross-Encoders',
+    topics: ['Cross-Encoder Architecture', 'Cohere Rerank', 'Re-scoring Top-N'],
+    learningObjectives: ['Improve top-3 retrieval quality', 'Measure reranker latency impact'],
+    tools: ['Cohere AI API', 'HuggingFace Cross-Encoder'],
+  },
+  {
+    day: 10,
+    module: 'Agentic AI',
+    title: 'Agentic AI Architectures & Tools',
+    topics: ['Agent Loops', 'State Management', 'Tool Definition', 'Control Flow'],
+    learningObjectives: ['Architect autonomous agents', 'Implement stateful execution'],
+    tools: ['LangGraph', 'Python'],
+  },
+  {
+    day: 11,
+    module: 'Agentic AI',
+    title: 'ReAct Framework & Tool Calling',
+    topics: ['Reasoning & Action Loop', 'JSON Tool Payloads', 'Error Correction'],
+    learningObjectives: ['Implement ReAct pattern', 'Handle tool execution exceptions'],
+    tools: ['OpenAI Function Calling', 'Custom Tools'],
+  },
+  {
+    day: 12,
+    module: 'Agentic AI',
+    title: 'LangChain & LlamaIndex Frameworks',
+    topics: ['Index Structures', 'Query Engines', 'Router Engines', 'Chain Composition'],
+    learningObjectives: ['Compare framework trade-offs', 'Build production query chains'],
+    tools: ['LlamaIndex', 'LangChain'],
+  },
+  {
+    day: 13,
+    module: 'Agentic AI',
+    title: 'Model Context Protocol (MCP) Integration',
+    topics: ['MCP Server Specification', 'Resource Providers', 'Tool Registration'],
+    learningObjectives: ['Build custom MCP servers', 'Connect external data sources'],
+    tools: ['MCP SDK', 'TypeScript / Python'],
+  },
+  {
+    day: 14,
+    module: 'Vector DB Advanced',
+    title: 'Advanced Vector Indexes (HNSW, IVFFlat)',
+    topics: ['HNSW Graphs', 'M & efConstruction Parameters', 'Quantization (PQ/SQ)'],
+    learningObjectives: ['Tune indexing parameters for throughput vs recall'],
+    tools: ['Qdrant', 'FAISS'],
+  },
+  {
+    day: 15,
+    module: 'Fine-Tuning',
+    title: 'Fine-Tuning Foundations (LoRA / QLoRA)',
+    topics: ['Parameter-Efficient Fine-Tuning', 'Quantized LoRA', 'Base Model Selection'],
+    learningObjectives: ['Format instruction datasets', 'Train domain-specific adapter weights'],
+    tools: ['Unsloth', 'PEFT', 'TRL', 'HuggingFace'],
+  },
+  {
+    day: 16,
+    module: 'Fine-Tuning',
+    title: 'Dataset Curation & Evaluation Models',
+    topics: ['Instruction Formatting', 'Synthetic Data Gen', 'LLM-as-a-Judge'],
+    learningObjectives: ['Clean domain training data', 'Setup LLM evaluation benchmarks'],
+    tools: ['Distilabel', 'OpenAI API'],
+  },
+  {
+    day: 17,
+    module: 'Observability',
+    title: 'LLM Observability & Tracing (LangSmith)',
+    topics: ['Span Tracing', 'Token Cost Tracking', 'Latency Breakdown', 'Feedback Logging'],
+    learningObjectives: ['Trace complex agent runs', 'Identify bottleneck steps'],
+    tools: ['LangSmith', 'Arize Phoenix', 'OpenTelemetry'],
+  },
+  {
+    day: 18,
+    module: 'AI Security',
+    title: 'Prompt Injection & AI Security',
+    topics: ['Direct Injection', 'Indirect Injection', 'Guardrails', 'Pertaining Filtering'],
+    learningObjectives: ['Secure LLM apps against attacks', 'Validate input/output safety'],
+    tools: ['NeMo Guardrails', 'Llama Guard'],
+  },
+  {
+    day: 19,
+    module: 'Backend Microservices',
+    title: 'Async Python & FastAPI Microservices',
+    topics: ['Asyncio Loops', 'FastAPI Endpoints', 'Dependency Injection', 'CORS'],
+    learningObjectives: ['Build async high-throughput APIs', 'Handle non-blocking IO'],
+    tools: ['FastAPI', 'Uvicorn', 'Pydantic v2'],
+  },
+  {
+    day: 20,
+    module: 'Infrastructure',
+    title: 'Dockerization of AI Microservices',
+    topics: ['Multi-Stage Builds', 'GPU Container Runtimes', 'Base Image Tuning'],
+    learningObjectives: ['Containerize Python LLM apps', 'Optimize image sizes under 500MB'],
+    tools: ['Docker', 'Docker Compose'],
+  },
+  {
+    day: 21,
+    module: 'Infrastructure',
+    title: 'Kubernetes Deployment for LLM Apps',
+    topics: ['Pods & Deployments', 'Horizontal Pod Autoscalers', 'Health Checks'],
+    learningObjectives: ['Deploy scalable AI endpoints', 'Configure readiness probes'],
+    tools: ['Kubectl', 'Helm', 'Minikube'],
+  },
+  {
+    day: 22,
+    module: 'Caching & Speed',
+    title: 'Caching Strategies (Redis & Semantic Cache)',
+    topics: ['Exact Match Caching', 'Semantic Vector Cache', 'TTL Invalidation'],
+    learningObjectives: ['Reduce LLM API costs by 40%', 'Achieve sub-50ms cache hits'],
+    tools: ['Redis', 'GPTCache'],
+  },
+  {
+    day: 23,
+    module: 'Streaming & Real-Time',
+    title: 'Streaming API Responses & WebSockets',
+    topics: ['Server-Sent Events (SSE)', 'WebSocket Protocols', 'Chunk Buffering'],
+    learningObjectives: ['Stream token responses live', 'Build interactive UI stream listeners'],
+    tools: ['FastAPI EventSource', 'WebSockets'],
+  },
+  {
+    day: 24,
+    module: 'Multi-Agent Systems',
+    title: 'Multi-Agent System Orchestration',
+    topics: ['Supervisor Agent', 'Hierarchical Teams', 'Message Passing'],
+    learningObjectives: ['Coordinate worker agents', 'Resolve inter-agent conflicts'],
+    tools: ['AutoGen', 'CrewAI', 'LangGraph'],
+  },
+  {
+    day: 25,
+    module: 'Testing & QA',
+    title: 'Automated Testing for LLM Pipelines',
+    topics: ['Regression Testing', 'Deterministic Assertions', 'CI Integration'],
+    learningObjectives: ['Build pytest suites for LLM pipelines', 'Run nightly evaluation runs'],
+    tools: ['Pytest', 'DeepEval'],
+  },
+  {
+    day: 26,
+    module: 'Cost & Budgeting',
+    title: 'Cost Optimization & Token Budgeting',
+    topics: ['Prompt Truncation', 'Model Routing (GPT-4o vs Flash)', 'Context Caching'],
+    learningObjectives: ['Implement dynamic model selection based on task complexity'],
+    tools: ['LiteLLM', 'OpenAI Context Caching'],
+  },
+  {
+    day: 27,
+    module: 'Local Inference',
+    title: 'Local LLM Deployment (Ollama / vLLM)',
+    topics: ['vLLM PagedAttention', 'GGUF Quantization', 'Inference Throughput'],
+    learningObjectives: ['Host open source LLMs locally', 'Benchmark tokens/second'],
+    tools: ['Ollama', 'vLLM', 'LM Studio'],
+  },
+  {
+    day: 28,
+    module: 'GPU Optimization',
+    title: 'GPU Memory Optimization (KVCache)',
+    topics: ['KV Cache Allocation', 'Batching Strategies', 'FlashAttention-2'],
+    learningObjectives: ['Understand memory bandwidth vs compute bound operations'],
+    tools: ['PyTorch', 'CUDA'],
+  },
+  {
+    day: 29,
+    module: 'Enterprise System Design',
+    title: 'Enterprise RAG System Architecture',
+    topics: ['High Availability', 'Multi-Tenant Isolation', 'Data Compliance'],
+    learningObjectives: ['Design enterprise-grade AI architecture blueprints'],
+    tools: ['System Architecture Diagramming'],
+  },
+  {
+    day: 30,
+    module: 'Production Operations',
+    title: 'Production AI Monitoring & Drift Detection',
+    topics: ['Data Drift', 'Concept Drift', 'Latency SLA Alarms', 'User Feedback Loops'],
+    learningObjectives: ['Monitor live production LLMs', 'Set up automated alert channels'],
+    tools: ['Prometheus', 'Grafana', 'Evidently AI'],
+  },
+  {
+    day: 31,
+    module: 'Capstone Project',
+    title: 'Capstone: End-to-End Autonomous AI Agent',
+    topics: ['System Integration', 'Live Console UI', 'RAG + Tools + Evaluation'],
+    learningObjectives: ['Deploy production AI agent platform', 'Present final system architecture'],
+    tools: ['Full Stack AI Interview Platform'],
+  },
+]
+
+// Generate default 31-day missions list with initial user learning state
+export function createDefaultMissions(): Mission[] {
+  const completedDays = [1, 2, 3, 5, 7, 8, 10, 12, 14]
   const skippedDays = [4, 9]
-  return {
-    day,
-    title: getMissionTitle(day),
-    passed: passedDays.includes(day),
-    skipped: skippedDays.includes(day),
-    attempts: passedDays.includes(day) ? 1 : 0,
-  }
-})
+  const inProgressDay = 13
 
-function getMissionTitle(day: number): string {
-  const titles = [
-    'Python & Data Structures Refresher',
-    'LLM API Integration & Prompting',
-    'Tokenization & Embeddings Deep Dive',
-    'Vector Database Fundamentals (ChromaDB)',
-    'RAG Pipeline Construction from Scratch',
-    'Chunking Strategies & Document Loaders',
-    'Retrieval Evaluation (Recall@K, MRR)',
-    'Semantic Search & Hybrid Keyword Search',
-    'Reranking Models & Cross-Encoders',
-    'Agentic AI Architectures & Tools',
-    'ReAct Framework & Tool Calling',
-    'LangChain & LlamaIndex Frameworks',
-    'Model Context Protocol (MCP) Tools',
-    'Advanced Vector Indexes (HNSW, IVFFlat)',
-    'Fine-Tuning Foundations (LoRA/QLoRA)',
-    'Dataset Curation & Evaluation Models',
-    'LLM Observability & Tracing (LangSmith)',
-    'Prompt Injection & AI Security',
-    'Async Python & FastAPI Microservices',
-    'Dockerization of AI Microservices',
-    'Kubernetes Deployment for LLM Apps',
-    'Caching Strategies (Redis & Semantic Cache)',
-    'Streaming API Responses & WebSockets',
-    'Multi-Agent System Orchestration',
-    'Automated Testing for LLM Pipelines',
-    'Cost Optimization & Token Budgeting',
-    'Local LLM Deployment (Ollama/vLLM)',
-    'GPU Memory Optimization (KVCache)',
-    'Enterprise RAG System Architecture',
-    'Production AI Monitoring & Drift Detection',
-    'Capstone: End-to-End Autonomous AI Agent',
-  ]
-  return titles[day - 1] || `AI Engineering Day ${day}`
+  return CURRICULUM_DATA.map((item) => {
+    let status: MissionStatus = 'AVAILABLE'
+    let passed = false
+    let skipped = false
+    let attempts = 0
+    let bestScore: number | undefined = undefined
+
+    if (completedDays.includes(item.day)) {
+      status = 'COMPLETED'
+      passed = true
+      attempts = 1
+      bestScore = 88
+    } else if (skippedDays.includes(item.day)) {
+      status = 'SKIPPED'
+      skipped = true
+      attempts = 1
+      bestScore = 55
+    } else if (item.day === inProgressDay) {
+      status = 'IN_PROGRESS'
+      attempts = 1
+    } else if (item.day > 15) {
+      status = 'LOCKED'
+    }
+
+    return {
+      ...item,
+      status,
+      passed,
+      skipped,
+      attempts,
+      bestScore,
+    }
+  })
 }
 
+// Scoped User Candidate Data Loader & Saver
 export function loadUserCandidateData(userId: string, userName: string, userEmail?: string): UserCandidateData {
   const key = `ai_interview_candidate_${userId}`
   try {
@@ -84,51 +332,30 @@ export function loadUserCandidateData(userId: string, userName: string, userEmai
       const parsed = JSON.parse(existing)
       return {
         ...parsed,
-        name: userName || parsed.name,
+        name: userName || parsed.name || 'Candidate',
         email: userEmail || parsed.email,
+        missions: Array.isArray(parsed.missions) && parsed.missions.length === 31 ? parsed.missions : createDefaultMissions(),
       }
     }
   } catch (err) {
-    console.error('Error reading candidate store', err)
+    console.error('Error reading candidate store from localStorage', err)
   }
 
-  // Initial candidate profile
+  // Initial user data instance (Isolated to this userId, starting fresh with 0 sessions)
   const initialData: UserCandidateData = {
     userId,
-    name: userName || 'Candidate',
+    name: userName || 'Candidate User',
     email: userEmail,
     jobRole: 'AI Engineer',
     yearsExperience: 3,
     education: 'B.S. Computer Science / AI',
-    sessions: [
-      {
-        id: 'SESS-101',
-        date: 'Aug 09, 2026',
-        role: 'AI Engineer',
-        score: 82,
-        technicalKnowledge: 86,
-        communication: 88,
-        status: 'Completed',
-        questionsCount: 10,
-        strengths: ['RAG Pipeline Architecture', 'Vector Search (HNSW)', 'Prompt Engineering'],
-        drawbacks: ['Retrieval Evaluation (Recall@K)', 'Model Context Protocol (MCP)'],
-      },
-      {
-        id: 'SESS-102',
-        date: 'Aug 05, 2026',
-        role: 'Data Engineer',
-        score: 75,
-        technicalKnowledge: 78,
-        communication: 82,
-        status: 'Completed',
-        questionsCount: 8,
-        strengths: ['SQL Query Optimization', 'ETL Pipeline Design'],
-        drawbacks: ['Streaming Data Processing'],
-      },
-    ],
-    lastResumeScore: 79,
-    lastResumeRole: 'AI Engineer',
-    missions: DEFAULT_MISSIONS,
+    sessions: [], // Empty session list for un-interviewed candidates
+    lastResumeScore: 0, // 0% until a resume is uploaded
+    lastResumeRole: null,
+    lastResumeDate: null,
+    missions: createDefaultMissions(),
+    profileCreatedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   }
 
   saveUserCandidateData(initialData)
@@ -136,23 +363,97 @@ export function loadUserCandidateData(userId: string, userName: string, userEmai
 }
 
 export function saveUserCandidateData(data: UserCandidateData) {
+  data.updatedAt = new Date().toISOString()
   const key = `ai_interview_candidate_${data.userId}`
   try {
     localStorage.setItem(key, JSON.stringify(data))
   } catch (err) {
-    console.error('Error saving candidate store', err)
+    console.error('Error saving candidate store to localStorage', err)
   }
 }
 
+import { updateUserProfileBackend, updateUserCurriculumBackend } from '../api'
+
+// Update User Profile Target Role, Experience & Job Description
+export function updateUserProfile(
+  userId: string,
+  userName: string,
+  updates: {
+    targetRole?: string
+    yearsExperience?: number
+    jobDescription?: string
+  }
+): UserCandidateData {
+  const data = loadUserCandidateData(userId, userName)
+  
+  if (updates.targetRole !== undefined && updates.targetRole !== data.jobRole) {
+    data.jobRole = updates.targetRole
+    // Mark resume match for re-analysis if target role changed
+    if (data.lastResumeRole && data.lastResumeRole !== updates.targetRole) {
+      data.lastResumeScore = null
+    }
+  }
+  
+  if (updates.yearsExperience !== undefined) {
+    data.yearsExperience = updates.yearsExperience
+  }
+  
+  if (updates.jobDescription !== undefined) {
+    data.jobDescription = updates.jobDescription
+  }
+
+  saveUserCandidateData(data)
+  // Sync asynchronously with FastAPI backend server
+  updateUserProfileBackend(userId, updates.targetRole, updates.yearsExperience, updates.jobDescription).catch(() => {})
+  return data
+}
+
+// Update Mission / Curriculum Day Status
+export function updateMissionStatus(
+  userId: string,
+  userName: string,
+  day: number,
+  newStatus: MissionStatus,
+  score?: number
+): UserCandidateData {
+  const data = loadUserCandidateData(userId, userName)
+  const index = data.missions.findIndex((m) => m.day === day)
+  
+  if (index !== -1) {
+    const current = data.missions[index]
+    const attempts = (current.attempts || 0) + 1
+    const passed = newStatus === 'COMPLETED'
+    const skipped = newStatus === 'SKIPPED'
+    const bestScore = score !== undefined ? Math.max(current.bestScore || 0, score) : current.bestScore || (passed ? 85 : undefined)
+
+    data.missions[index] = {
+      ...current,
+      status: newStatus,
+      passed,
+      skipped,
+      attempts,
+      bestScore,
+      completionDate: passed ? new Date().toISOString().split('T')[0] : current.completionDate,
+    }
+
+    saveUserCandidateData(data)
+    // Sync asynchronously with FastAPI backend server
+    updateUserCurriculumBackend(userId, day, newStatus, score).catch(() => {})
+  }
+
+  return data
+}
+
+// Add completed interview session
 export function addFinishedSession(userId: string, userName: string, feedback: Feedback, targetRole: string) {
   const data = loadUserCandidateData(userId, userName)
-  const scoreMatch = feedback.summary.match(/(\d{1,3})\s*\/\s*100/)
+  const scoreMatch = feedback.summary ? feedback.summary.match(/(\d{1,3})\s*\/\s*100/) : null
   const score = feedback.overallScore ?? (scoreMatch ? parseInt(scoreMatch[1], 10) : 80)
 
   const newSession: SavedSession = {
     id: `SESS-${Date.now().toString().slice(-4)}`,
     date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-    role: targetRole || 'AI Engineer',
+    role: targetRole || data.jobRole,
     score,
     technicalKnowledge: feedback.technicalKnowledge ?? 80,
     communication: feedback.communication ?? 85,
@@ -167,34 +468,66 @@ export function addFinishedSession(userId: string, userName: string, feedback: F
   return data
 }
 
+// Update Resume AI Score
 export function updateResumeScore(userId: string, userName: string, score: number, role: string) {
   const data = loadUserCandidateData(userId, userName)
   data.lastResumeScore = score
   data.lastResumeRole = role
+  data.lastResumeDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
   saveUserCandidateData(data)
   return data
 }
 
+// Role-specific default skill matrices
+const ROLE_SKILLS_MAP: Record<string, { strengths: string[]; weaknesses: string[] }> = {
+  'AI Engineer': {
+    strengths: ['RAG Pipeline Architecture', 'Vector Search (HNSW)', 'Prompt Engineering'],
+    weaknesses: ['Retrieval Evaluation (Recall@K)', 'Model Context Protocol (MCP)', 'Streaming Data Processing'],
+  },
+  'Data Engineer': {
+    strengths: ['SQL Query Optimization', 'ETL Pipeline Design', 'Data Warehousing (Snowflake)'],
+    weaknesses: ['Apache Spark Tuning', 'Real-Time Streaming (Kafka)', 'Data Governance'],
+  },
+  'Backend Engineer': {
+    strengths: ['Microservices Architecture', 'Database Indexing & Queries', 'Caching Strategies (Redis)'],
+    weaknesses: ['System Scalability under 100k QPS', 'Async Event Loops', 'gRPC Protocol Buffers'],
+  },
+  'ML Engineer': {
+    strengths: ['PyTorch Model Training', 'Feature Engineering', 'Model Quantization (INT8)'],
+    weaknesses: ['MLOps Pipeline Deployment', 'GPU Memory Management', 'Distributed Training'],
+  },
+  'Software Engineer': {
+    strengths: ['Object-Oriented Design', 'Algorithms & Data Structures', 'CI/CD Pipelines'],
+    weaknesses: ['Distributed System Design', 'High Concurrency Locks', 'Performance Profiling'],
+  },
+}
+
+export function getRoleSkills(role: string) {
+  const matchedKey = Object.keys(ROLE_SKILLS_MAP).find(
+    (k) => role.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(role.toLowerCase())
+  )
+  return ROLE_SKILLS_MAP[matchedKey || 'AI Engineer'] || ROLE_SKILLS_MAP['AI Engineer']
+}
+
+// Deterministic Metrics Calculation
 export function calculateCandidateMetrics(data: UserCandidateData): Candidate {
   const sessions = data.sessions
-  const avgScore = sessions.length > 0 ? Math.round(sessions.reduce((acc, s) => acc + s.score, 0) / sessions.length) : 80
-  const avgTech = sessions.length > 0 ? Math.round(sessions.reduce((acc, s) => acc + s.technicalKnowledge, 0) / sessions.length) : 82
-  const avgComm = sessions.length > 0 ? Math.round(sessions.reduce((acc, s) => acc + s.communication, 0) / sessions.length) : 85
+  const completedMissions = data.missions.filter((m) => m.status === 'COMPLETED' || m.passed)
 
   return {
     member: {
       id: data.userId,
       name: data.name,
-      jobRole: data.lastResumeRole || data.jobRole,
+      jobRole: data.jobRole,
       yearsExperience: data.yearsExperience,
       education: data.education,
-      status: `Active Candidate (${avgScore}% Score, ${avgTech}% Tech, ${avgComm}% Comm)`,
+      status: `Active Candidate (${sessions.length} sessions, ${completedMissions.length}/31 days)`,
     },
     missions: data.missions,
     signals: {
-      commitDays: data.missions.filter(m => m.passed).length + 4,
-      missionsCompleted: data.missions.filter(m => m.passed).length,
-      missionsFirstTry: Math.max(1, data.missions.filter(m => m.passed).length - 2),
+      commitDays: completedMissions.length + (data.missions.some(m => m.status === 'IN_PROGRESS') ? 1 : 0),
+      missionsCompleted: completedMissions.length,
+      missionsFirstTry: Math.max(0, completedMissions.length - 1),
     },
   }
 }

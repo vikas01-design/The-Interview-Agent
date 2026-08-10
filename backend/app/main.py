@@ -51,6 +51,29 @@ async def health() -> dict:
     return {"status": "ok", "team": "TECH REALMS"}
 
 
+from app.services.user_store import (
+    add_user_interview_session,
+    calculate_user_dashboard,
+    evaluate_candidate_json,
+    get_user_profile,
+    update_user_career_target,
+    update_user_mission_status,
+)
+
+
+class EvaluateRequest(BaseModel):
+    candidate_id: str
+
+
+@app.post("/api/candidate/evaluate")
+async def evaluate_candidate_endpoint(request: EvaluateRequest) -> dict:
+    """
+    Evaluates candidate metrics and intelligence strictly following schema rules.
+    Omits candidate_intelligence object if no interview attended.
+    """
+    return evaluate_candidate_json(request.candidate_id)
+
+
 @app.get("/api/candidates")
 async def candidates_endpoint() -> dict:
     """
@@ -59,6 +82,61 @@ async def candidates_endpoint() -> dict:
     """
     candidates = await fetch_candidates_from_breeth()
     return {"candidates": candidates}
+
+
+class ProfileUpdateRequest(BaseModel):
+    targetRole: str | None = None
+    yearsExperience: int | None = None
+    jobDescription: str | None = None
+
+
+class MissionUpdateRequest(BaseModel):
+    status: str
+    score: int | None = None
+
+
+@app.get("/api/user/{user_id}")
+async def get_user_dashboard_endpoint(user_id: str, name: str = "Candidate User", email: str | None = None) -> dict:
+    """
+    Returns authenticated user's isolated profile, 31-day curriculum, and calculated dashboard analytics.
+    """
+    get_user_profile(user_id, name, email)
+    return calculate_user_dashboard(user_id)
+
+
+@app.put("/api/user/{user_id}/profile")
+async def update_user_profile_endpoint(user_id: str, request: ProfileUpdateRequest) -> dict:
+    """
+    Updates authenticated user's career target role, experience, and optional job description.
+    Recalculates role alignment and skill priorities server-side.
+    """
+    return update_user_career_target(
+        user_id=user_id,
+        target_role=request.targetRole,
+        years_experience=request.yearsExperience,
+        job_description=request.jobDescription,
+    )
+
+
+@app.put("/api/user/{user_id}/curriculum/{day}")
+async def update_user_curriculum_endpoint(user_id: str, day: int, request: MissionUpdateRequest) -> dict:
+    """
+    Updates completion status and score for a specific day in the 31-day curriculum.
+    """
+    return update_user_mission_status(
+        user_id=user_id,
+        day=day,
+        status=request.status,
+        score=request.score,
+    )
+
+
+@app.post("/api/user/{user_id}/session")
+async def add_user_session_endpoint(user_id: str, session_data: dict) -> dict:
+    """
+    Records a completed interview session and updates user performance analytics.
+    """
+    return add_user_interview_session(user_id, session_data)
 
 
 class ResumeAnalyzeRequest(BaseModel):
