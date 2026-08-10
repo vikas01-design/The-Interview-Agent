@@ -32,6 +32,130 @@ export interface UserCandidateData {
   updatedAt?: string
 }
 
+// Initial unique seeds for dataset candidates (Each candidate has a DISTINCT, non-identical evaluation profile)
+const DATASET_SEED_PROFILES: Record<string, { jobRole: string; yearsExperience: number; lastResumeScore: number; sessions: SavedSession[] }> = {
+  'CAND-001': {
+    jobRole: 'Senior Data Engineer',
+    yearsExperience: 9,
+    lastResumeScore: 92,
+    sessions: [
+      {
+        id: 'SESS-CAND-001',
+        date: 'Aug 08, 2026',
+        role: 'Senior Data Engineer',
+        score: 89,
+        technicalKnowledge: 91,
+        communication: 87,
+        status: 'Completed',
+        questionsCount: 10,
+        strengths: ['SQL Query Optimization', 'ETL Pipeline Design', 'Data Warehousing (Snowflake)'],
+        drawbacks: ['Apache Spark Tuning', 'Real-Time Streaming (Kafka)'],
+      },
+    ],
+  },
+  'CAND-002': {
+    jobRole: 'Backend Software Engineer',
+    yearsExperience: 5,
+    lastResumeScore: 84,
+    sessions: [
+      {
+        id: 'SESS-CAND-002',
+        date: 'Aug 07, 2026',
+        role: 'Backend Software Engineer',
+        score: 78,
+        technicalKnowledge: 81,
+        communication: 75,
+        status: 'Completed',
+        questionsCount: 8,
+        strengths: ['Microservices Architecture', 'Database Indexing & Queries'],
+        drawbacks: ['System Scalability under 100k QPS', 'Async Event Loops'],
+      },
+    ],
+  },
+  'CAND-003': {
+    jobRole: 'AI Engineer',
+    yearsExperience: 6,
+    lastResumeScore: 96,
+    sessions: [
+      {
+        id: 'SESS-CAND-003',
+        date: 'Aug 09, 2026',
+        role: 'AI Engineer',
+        score: 95,
+        technicalKnowledge: 96,
+        communication: 94,
+        status: 'Completed',
+        questionsCount: 12,
+        strengths: ['RAG Pipeline Architecture', 'Vector Search (HNSW)', 'Prompt Engineering'],
+        drawbacks: ['Model Context Protocol (MCP)'],
+      },
+    ],
+  },
+  'CAND-004': {
+    jobRole: 'Business Analyst',
+    yearsExperience: 8,
+    lastResumeScore: 60,
+    sessions: [
+      {
+        id: 'SESS-CAND-004',
+        date: 'Aug 04, 2026',
+        role: 'Business Analyst',
+        score: 68,
+        technicalKnowledge: 64,
+        communication: 72,
+        status: 'Completed',
+        questionsCount: 6,
+        strengths: ['Data Requirements Analysis', 'Stakeholder Communication'],
+        drawbacks: ['Python Data Structures', 'FastAPI Microservices'],
+      },
+    ],
+  },
+  'CAND-005': {
+    jobRole: 'DevOps Engineer',
+    yearsExperience: 10,
+    lastResumeScore: 88,
+    sessions: [
+      {
+        id: 'SESS-CAND-005',
+        date: 'Aug 06, 2026',
+        role: 'DevOps Engineer',
+        score: 84,
+        technicalKnowledge: 88,
+        communication: 80,
+        status: 'Completed',
+        questionsCount: 10,
+        strengths: ['Docker & Kubernetes Deployment', 'CI/CD Pipelines'],
+        drawbacks: ['LLM Fine-Tuning Foundations'],
+      },
+    ],
+  },
+  'CAND-006': {
+    jobRole: 'Marketing Manager',
+    yearsExperience: 12,
+    lastResumeScore: 45,
+    sessions: [
+      {
+        id: 'SESS-CAND-006',
+        date: 'Aug 03, 2026',
+        role: 'Marketing Manager',
+        score: 58,
+        technicalKnowledge: 52,
+        communication: 64,
+        status: 'Completed',
+        questionsCount: 5,
+        strengths: ['User Requirement Scoping'],
+        drawbacks: ['Code Syntax & Algorithms', 'Vector Databases'],
+      },
+    ],
+  },
+  'CAND-007': {
+    jobRole: 'Computer Science Intern',
+    yearsExperience: 0,
+    lastResumeScore: 0,
+    sessions: [], // Un-interviewed intern candidate -> strictly 0 metrics & empty candidate intelligence!
+  },
+}
+
 // Full 31-Day AI & Tech Engineering Curriculum Dataset
 const CURRICULUM_DATA: Omit<Mission, 'passed' | 'skipped' | 'attempts' | 'status'>[] = [
   {
@@ -297,34 +421,30 @@ export function createDefaultMissions(): Mission[] {
 // Scoped User Candidate Data Loader & Saver with Auto-Sanitization of Legacy Seed Data
 export function loadUserCandidateData(userId: string, userName: string, userEmail?: string): UserCandidateData {
   const key = `ai_interview_candidate_${userId}`
+  const seed = DATASET_SEED_PROFILES[userId]
+
   try {
     const existing = localStorage.getItem(key)
     if (existing) {
       const parsed = JSON.parse(existing)
       
-      // Purge any session that contains mock seed identifiers or legacy preset scores
+      // Filter out legacy mock sessions (SESS-101, SESS-102) while preserving candidate specific dataset sessions
       const realSessions = Array.isArray(parsed.sessions)
         ? parsed.sessions.filter((s: any) => {
             if (!s || typeof s !== 'object') return false
-            const isMockId = s.id === 'SESS-101' || s.id === 'SESS-102' || String(s.id).startsWith('SESS-10')
-            const isMockScoreCombination = (s.score === 82 && s.technicalKnowledge === 86) || (s.score === 76 && s.technicalKnowledge === 78)
-            return !isMockId && !isMockScoreCombination
+            return s.id !== 'SESS-101' && s.id !== 'SESS-102'
           })
         : []
-
-      // Purge legacy mock resume score 79 if no real uploaded resume text
-      const isLegacyMockResume = parsed.lastResumeScore === 79 || !parsed.resumeText
-      const realResumeScore = (isLegacyMockResume || !parsed.resumeText) ? 0 : (parsed.lastResumeScore || 0)
-      const realResumeRole = (realResumeScore > 0 && parsed.resumeText) ? parsed.lastResumeRole : null
 
       const cleanedData: UserCandidateData = {
         ...parsed,
         name: userName || parsed.name || 'Candidate',
         email: userEmail || parsed.email,
+        jobRole: parsed.jobRole || (seed ? seed.jobRole : 'AI Engineer'),
+        yearsExperience: parsed.yearsExperience ?? (seed ? seed.yearsExperience : 3),
         sessions: realSessions,
-        lastResumeScore: realResumeScore,
-        lastResumeRole: realResumeRole,
-        hasRealUserActivity: realSessions.length > 0 || (realResumeScore > 0 && !!parsed.resumeText),
+        lastResumeScore: parsed.lastResumeScore ?? (seed ? seed.lastResumeScore : 0),
+        lastResumeRole: parsed.lastResumeRole ?? (seed ? seed.jobRole : null),
         missions: Array.isArray(parsed.missions) && parsed.missions.length === 31 ? parsed.missions : createDefaultMissions(),
       }
 
@@ -335,19 +455,18 @@ export function loadUserCandidateData(userId: string, userName: string, userEmai
     console.error('Error reading candidate store from localStorage', err)
   }
 
-  // Initial user data instance for a fresh candidate (Strictly 0 sessions & 0% resume score)
+  // Initial user data instance for a fresh candidate or dataset persona
   const initialData: UserCandidateData = {
     userId,
-    name: userName || 'Candidate User',
+    name: userName || (seed ? userId : 'Candidate User'),
     email: userEmail,
-    jobRole: 'AI Engineer',
-    yearsExperience: 3,
+    jobRole: seed ? seed.jobRole : 'AI Engineer',
+    yearsExperience: seed ? seed.yearsExperience : 3,
     education: 'B.S. Computer Science / AI',
-    sessions: [], // Strictly empty for un-interviewed candidates
-    lastResumeScore: 0, // Strictly 0% if no resume uploaded
-    lastResumeRole: null,
-    lastResumeDate: null,
-    hasRealUserActivity: false,
+    sessions: seed ? seed.sessions : [], // dataset seed or 0 for fresh candidates
+    lastResumeScore: seed ? seed.lastResumeScore : 0,
+    lastResumeRole: seed ? seed.jobRole : null,
+    lastResumeDate: seed && seed.lastResumeScore > 0 ? 'Aug 08, 2026' : null,
     missions: createDefaultMissions(),
     profileCreatedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -369,7 +488,6 @@ export function saveUserCandidateData(data: UserCandidateData) {
 
 import { updateUserProfileBackend, updateUserCurriculumBackend } from '../api'
 
-// Update User Profile Target Role, Experience & Job Description
 export function updateUserProfile(
   userId: string,
   userName: string,
@@ -402,7 +520,6 @@ export function updateUserProfile(
   return data
 }
 
-// Update Mission / Curriculum Day Status
 export function updateMissionStatus(
   userId: string,
   userName: string,
@@ -437,7 +554,6 @@ export function updateMissionStatus(
   return data
 }
 
-// Add completed interview session
 export function addFinishedSession(userId: string, userName: string, feedback: Feedback, targetRole: string) {
   const data = loadUserCandidateData(userId, userName)
   const scoreMatch = feedback.summary ? feedback.summary.match(/(\d{1,3})\s*\/\s*100/) : null
@@ -462,7 +578,6 @@ export function addFinishedSession(userId: string, userName: string, feedback: F
   return data
 }
 
-// Update Resume AI Score
 export function updateResumeScore(userId: string, userName: string, score: number, role: string, resumeText?: string) {
   const data = loadUserCandidateData(userId, userName)
   data.lastResumeScore = score
@@ -479,11 +594,11 @@ const ROLE_SKILLS_MAP: Record<string, { strengths: string[]; weaknesses: string[
     strengths: ['RAG Pipeline Architecture', 'Vector Search (HNSW)', 'Prompt Engineering'],
     weaknesses: ['Retrieval Evaluation (Recall@K)', 'Model Context Protocol (MCP)', 'Streaming Data Processing'],
   },
-  'Data Engineer': {
+  'Senior Data Engineer': {
     strengths: ['SQL Query Optimization', 'ETL Pipeline Design', 'Data Warehousing (Snowflake)'],
     weaknesses: ['Apache Spark Tuning', 'Real-Time Streaming (Kafka)', 'Data Governance'],
   },
-  'Backend Engineer': {
+  'Backend Software Engineer': {
     strengths: ['Microservices Architecture', 'Database Indexing & Queries', 'Caching Strategies (Redis)'],
     weaknesses: ['System Scalability under 100k QPS', 'Async Event Loops', 'gRPC Protocol Buffers'],
   },
@@ -491,9 +606,13 @@ const ROLE_SKILLS_MAP: Record<string, { strengths: string[]; weaknesses: string[
     strengths: ['PyTorch Model Training', 'Feature Engineering', 'Model Quantization (INT8)'],
     weaknesses: ['MLOps Pipeline Deployment', 'GPU Memory Management', 'Distributed Training'],
   },
-  'Software Engineer': {
-    strengths: ['Object-Oriented Design', 'Algorithms & Data Structures', 'CI/CD Pipelines'],
-    weaknesses: ['Distributed System Design', 'High Concurrency Locks', 'Performance Profiling'],
+  'Business Analyst': {
+    strengths: ['Data Requirements Analysis', 'Stakeholder Communication'],
+    weaknesses: ['Python Data Structures', 'FastAPI Microservices'],
+  },
+  'DevOps Engineer': {
+    strengths: ['Docker & Kubernetes Deployment', 'CI/CD Pipelines'],
+    weaknesses: ['LLM Fine-Tuning Foundations'],
   },
 }
 

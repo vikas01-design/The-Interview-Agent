@@ -66,18 +66,19 @@ function App() {
 
   const [refreshKey, setRefreshKey] = useState(0)
 
-  // Load real persistent data for the logged-in candidate user (scoped by user ID)
-  const userId = user?.id || 'guest_candidate'
-  const candidateName = user?.fullName || user?.firstName || (user?.primaryEmailAddress?.emailAddress ? user.primaryEmailAddress.emailAddress.split('@')[0] : 'Candidate User')
+  // Scope active candidate data dynamically to the currently selected persona in dropdown
+  const currentCandidateId = selectedInterviewer?.member?.id || user?.id || 'guest_candidate'
+  const currentCandidateName = selectedInterviewer?.member?.name || user?.fullName || user?.firstName || 'Candidate User'
   const userEmail = user?.primaryEmailAddress?.emailAddress
 
-  const candidateData = loadUserCandidateData(userId, candidateName, userEmail)
+  const candidateData = loadUserCandidateData(currentCandidateId, currentCandidateName, userEmail)
   const activeCandidate = calculateCandidateMetrics(candidateData)
 
   function handleInterviewerChange(interviewerId: string) {
     const found = interviewers.find((c) => c.member.id === interviewerId)
     if (found) {
       setSelectedInterviewer(found)
+      setRefreshKey((prev) => prev + 1)
     }
   }
 
