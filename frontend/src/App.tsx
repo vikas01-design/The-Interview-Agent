@@ -40,6 +40,19 @@ function App() {
   const [cameraStreamConfig, setCameraStreamConfig] = useState<MediaStream | null>(null)
 
   useEffect(() => {
+    // Purge legacy mock seed data keys from browser localStorage
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i)
+        if (key && key.startsWith('ai_interview_candidate_')) {
+          const val = localStorage.getItem(key)
+          if (val && (val.includes('SESS-101') || val.includes('SESS-102') || val.includes('"lastResumeScore":79') || val.includes('"lastResumeScore": 79'))) {
+            localStorage.removeItem(key)
+          }
+        }
+      }
+    } catch (e) {}
+
     loadCandidates()
       .then((data) => {
         setInterviewers(data)

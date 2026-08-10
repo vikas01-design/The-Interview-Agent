@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 _USERS_DIR = DATA_DIR / "users"
 _USERS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Role-specific default skill matrices for evaluation reference
+# Role-specific default skill matrices for reference
 ROLE_SKILLS_MAP: dict[str, dict[str, list[str]]] = {
     "AI Engineer": {
         "strengths": ["RAG Pipeline Architecture", "Vector Search (HNSW)", "Prompt Engineering"],
@@ -73,19 +73,41 @@ def build_default_missions() -> list[dict[str, Any]]:
     return missions
 
 
+def sanitize_user_profile(data: dict[str, Any]) -> dict[str, Any]:
+    """
+    Purges legacy mock/seed sessions (e.g. SESS-101, SESS-102) and mock resume scores (79)
+    so candidates without actual interviews or uploaded resumes strictly start at 0.
+    """
+    sessions = data.get("sessions", [])
+    # Filter out mock/seed sessions
+    real_sessions = [
+        s for s in sessions
+        if isinstance(s, dict) and s.get("id") not in ("SESS-101", "SESS-102") and not str(s.get("id", "")).startswith("SESS-10")
+    ]
+    data["sessions"] = real_sessions
+
+    # Purge mock resume score if it matches the legacy mock seed 79 with no actual uploaded resume
+    if data.get("lastResumeScore") == 79 and (data.get("lastResumeDate") == "Aug 08, 2026" or not data.get("resumeText")):
+        data["lastResumeScore"] = 0
+        data["lastResumeRole"] = None
+
+    return data
+
+
 def get_user_profile(user_id: str, name: str = "Candidate User", email: str | None = None) -> dict[str, Any]:
     file_path = _USERS_DIR / f"{user_id}.json"
     if file_path.exists():
         try:
             data = json.loads(file_path.read_text(encoding="utf-8"))
+            data = sanitize_user_profile(data)
             if "missions" not in data or len(data["missions"]) != 31:
                 data["missions"] = build_default_missions()
-                save_user_profile(user_id, data)
+            save_user_profile(user_id, data)
             return data
         except Exception as exc:
             logger.warning("Failed to load user profile %s: %s", user_id, exc)
 
-    # Initial profile data for brand new candidate (NO fake hardcoded sessions or resume score)
+    # Initial profile data for brand new candidate (0 sessions, 0% resume score)
     new_profile: dict[str, Any] = {
         "userId": user_id,
         "name": name,
@@ -94,8 +116,8 @@ def get_user_profile(user_id: str, name: str = "Candidate User", email: str | No
         "yearsExperience": 3,
         "jobDescription": "",
         "education": "B.S. Computer Science / AI",
-        "sessions": [],  # Empty sessions list for un-interviewed candidates
-        "lastResumeScore": 0,  # 0% if no resume uploaded
+        "sessions": [],  # Strictly 0 sessions for un-interviewed candidate
+        "lastResumeScore": 0,  # Strictly 0% if no resume uploaded
         "lastResumeRole": None,
         "missions": build_default_missions(),
         "createdAt": datetime.utcnow().isoformat(),
@@ -187,9 +209,8 @@ def calculate_user_dashboard(user_id: str) -> dict[str, Any]:
     avg_comm = round(sum(s["communication"] for s in sessions) / len(sessions)) if has_sessions else 0
 
     is_resume_matched = profile.get("lastResumeRole") == target_role
-    resume_score = profile.get("lastResumeScore") if is_resume_matched else 0
+    resume_score = profile.get("lastResumeScore") if (is_resume_matched and profile.get("lastResumeScore")) else 0
 
-    # Extract real evaluated strengths & drawbacks from candidate's actual sessions
     eval_strengths = list(set(st for s in sessions for st in s.get("strengths", []))) if has_sessions else []
     eval_drawbacks = list(set(dr for s in sessions for dr in s.get("drawbacks", []))) if has_sessions else []
 

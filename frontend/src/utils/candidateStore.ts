@@ -25,6 +25,8 @@ export interface UserCandidateData {
   lastResumeScore: number | null
   lastResumeRole: string | null
   lastResumeDate?: string | null
+  resumeText?: string
+  hasRealUserActivity?: boolean
   missions: Mission[]
   profileCreatedAt?: string
   updatedAt?: string
@@ -282,66 +284,58 @@ const CURRICULUM_DATA: Omit<Mission, 'passed' | 'skipped' | 'attempts' | 'status
   },
 ]
 
-// Generate default 31-day missions list with initial user learning state
 export function createDefaultMissions(): Mission[] {
-  const completedDays = [1, 2, 3, 5, 7, 8, 10, 12, 14]
-  const skippedDays = [4, 9]
-  const inProgressDay = 13
-
-  return CURRICULUM_DATA.map((item) => {
-    let status: MissionStatus = 'AVAILABLE'
-    let passed = false
-    let skipped = false
-    let attempts = 0
-    let bestScore: number | undefined = undefined
-
-    if (completedDays.includes(item.day)) {
-      status = 'COMPLETED'
-      passed = true
-      attempts = 1
-      bestScore = 88
-    } else if (skippedDays.includes(item.day)) {
-      status = 'SKIPPED'
-      skipped = true
-      attempts = 1
-      bestScore = 55
-    } else if (item.day === inProgressDay) {
-      status = 'IN_PROGRESS'
-      attempts = 1
-    } else if (item.day > 15) {
-      status = 'LOCKED'
-    }
-
-    return {
-      ...item,
-      status,
-      passed,
-      skipped,
-      attempts,
-      bestScore,
-    }
-  })
+  return CURRICULUM_DATA.map((item) => ({
+    ...item,
+    status: item.day <= 5 ? 'AVAILABLE' : (item.day > 15 ? 'LOCKED' : 'AVAILABLE'),
+    passed: false,
+    skipped: false,
+    attempts: 0,
+  }))
 }
 
-// Scoped User Candidate Data Loader & Saver
+// Scoped User Candidate Data Loader & Saver with Auto-Sanitization of Legacy Seed Data
 export function loadUserCandidateData(userId: string, userName: string, userEmail?: string): UserCandidateData {
   const key = `ai_interview_candidate_${userId}`
   try {
     const existing = localStorage.getItem(key)
     if (existing) {
       const parsed = JSON.parse(existing)
-      return {
+      
+      // Purge any session that contains mock seed identifiers or legacy preset scores
+      const realSessions = Array.isArray(parsed.sessions)
+        ? parsed.sessions.filter((s: any) => {
+            if (!s || typeof s !== 'object') return false
+            const isMockId = s.id === 'SESS-101' || s.id === 'SESS-102' || String(s.id).startsWith('SESS-10')
+            const isMockScoreCombination = (s.score === 82 && s.technicalKnowledge === 86) || (s.score === 76 && s.technicalKnowledge === 78)
+            return !isMockId && !isMockScoreCombination
+          })
+        : []
+
+      // Purge legacy mock resume score 79 if no real uploaded resume text
+      const isLegacyMockResume = parsed.lastResumeScore === 79 || !parsed.resumeText
+      const realResumeScore = (isLegacyMockResume || !parsed.resumeText) ? 0 : (parsed.lastResumeScore || 0)
+      const realResumeRole = (realResumeScore > 0 && parsed.resumeText) ? parsed.lastResumeRole : null
+
+      const cleanedData: UserCandidateData = {
         ...parsed,
         name: userName || parsed.name || 'Candidate',
         email: userEmail || parsed.email,
+        sessions: realSessions,
+        lastResumeScore: realResumeScore,
+        lastResumeRole: realResumeRole,
+        hasRealUserActivity: realSessions.length > 0 || (realResumeScore > 0 && !!parsed.resumeText),
         missions: Array.isArray(parsed.missions) && parsed.missions.length === 31 ? parsed.missions : createDefaultMissions(),
       }
+
+      saveUserCandidateData(cleanedData)
+      return cleanedData
     }
   } catch (err) {
     console.error('Error reading candidate store from localStorage', err)
   }
 
-  // Initial user data instance (Isolated to this userId, starting fresh with 0 sessions)
+  // Initial user data instance for a fresh candidate (Strictly 0 sessions & 0% resume score)
   const initialData: UserCandidateData = {
     userId,
     name: userName || 'Candidate User',
@@ -349,10 +343,11 @@ export function loadUserCandidateData(userId: string, userName: string, userEmai
     jobRole: 'AI Engineer',
     yearsExperience: 3,
     education: 'B.S. Computer Science / AI',
-    sessions: [], // Empty session list for un-interviewed candidates
-    lastResumeScore: 0, // 0% until a resume is uploaded
+    sessions: [], // Strictly empty for un-interviewed candidates
+    lastResumeScore: 0, // Strictly 0% if no resume uploaded
     lastResumeRole: null,
     lastResumeDate: null,
+    hasRealUserActivity: false,
     missions: createDefaultMissions(),
     profileCreatedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -388,9 +383,9 @@ export function updateUserProfile(
   
   if (updates.targetRole !== undefined && updates.targetRole !== data.jobRole) {
     data.jobRole = updates.targetRole
-    // Mark resume match for re-analysis if target role changed
     if (data.lastResumeRole && data.lastResumeRole !== updates.targetRole) {
-      data.lastResumeScore = null
+      data.lastResumeScore = 0
+      data.lastResumeRole = null
     }
   }
   
@@ -403,7 +398,6 @@ export function updateUserProfile(
   }
 
   saveUserCandidateData(data)
-  // Sync asynchronously with FastAPI backend server
   updateUserProfileBackend(userId, updates.targetRole, updates.yearsExperience, updates.jobDescription).catch(() => {})
   return data
 }
@@ -437,7 +431,6 @@ export function updateMissionStatus(
     }
 
     saveUserCandidateData(data)
-    // Sync asynchronously with FastAPI backend server
     updateUserCurriculumBackend(userId, day, newStatus, score).catch(() => {})
   }
 
@@ -451,7 +444,7 @@ export function addFinishedSession(userId: string, userName: string, feedback: F
   const score = feedback.overallScore ?? (scoreMatch ? parseInt(scoreMatch[1], 10) : 80)
 
   const newSession: SavedSession = {
-    id: `SESS-${Date.now().toString().slice(-4)}`,
+    id: `REAL-SESS-${Date.now()}`,
     date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
     role: targetRole || data.jobRole,
     score,
@@ -464,21 +457,23 @@ export function addFinishedSession(userId: string, userName: string, feedback: F
   }
 
   data.sessions = [newSession, ...data.sessions]
+  data.hasRealUserActivity = true
   saveUserCandidateData(data)
   return data
 }
 
 // Update Resume AI Score
-export function updateResumeScore(userId: string, userName: string, score: number, role: string) {
+export function updateResumeScore(userId: string, userName: string, score: number, role: string, resumeText?: string) {
   const data = loadUserCandidateData(userId, userName)
   data.lastResumeScore = score
   data.lastResumeRole = role
+  if (resumeText) data.resumeText = resumeText
+  data.hasRealUserActivity = true
   data.lastResumeDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
   saveUserCandidateData(data)
   return data
 }
 
-// Role-specific default skill matrices
 const ROLE_SKILLS_MAP: Record<string, { strengths: string[]; weaknesses: string[] }> = {
   'AI Engineer': {
     strengths: ['RAG Pipeline Architecture', 'Vector Search (HNSW)', 'Prompt Engineering'],
@@ -509,7 +504,6 @@ export function getRoleSkills(role: string) {
   return ROLE_SKILLS_MAP[matchedKey || 'AI Engineer'] || ROLE_SKILLS_MAP['AI Engineer']
 }
 
-// Deterministic Metrics Calculation
 export function calculateCandidateMetrics(data: UserCandidateData): Candidate {
   const sessions = data.sessions
   const completedMissions = data.missions.filter((m) => m.status === 'COMPLETED' || m.passed)
