@@ -65,18 +65,18 @@ export function TelemetryDashboardModal({ sessionId, onClose }: Props) {
 
   const filteredEvents = events.filter((e) => filterType === 'ALL' || e.eventType === filterType)
 
-  function getBadgeVariant(eventType: string): 'default' | 'success' | 'warning' | 'info' {
+  function getBadgeVariant(eventType: string): 'yellow' | 'pink' | 'cyan' | 'green' | 'cream' | 'black' | 'white' {
     switch (eventType) {
       case 'DIFFICULTY_SHIFT':
-        return 'warning'
+        return 'yellow'
       case 'FOLLOW_UP_TRIGGER':
-        return 'info'
+        return 'cyan'
       case 'CODE_EXECUTION':
-        return 'success'
+        return 'green'
       case 'EDGE_CASE_DETECTED':
-        return 'default'
+        return 'pink'
       default:
-        return 'info'
+        return 'white'
     }
   }
 
@@ -96,7 +96,7 @@ export function TelemetryDashboardModal({ sessionId, onClose }: Props) {
               Real-time telemetry log tracking agent state transitions, difficulty scaling, and sandbox code executions.
             </p>
           </div>
-          <NeuButton variant="subtle" onClick={onClose}>
+          <NeuButton variant="white" onClick={onClose}>
             ✕ Close
           </NeuButton>
         </div>
@@ -178,11 +178,12 @@ export function TelemetryDashboardModal({ sessionId, onClose }: Props) {
         {/* Footer */}
         <div className="pt-3 border-t border-stone-800 flex items-center justify-between text-xs text-stone-400">
           <span>Session ID: {sessionId || 'Global Analytics Snapshot'}</span>
-          <NeuButton variant="primary" onClick={onClose}>
+          <NeuButton variant="yellow" onClick={onClose}>
             Done
           </NeuButton>
         </div>
       </div>
     </div>
   )
+
 }
