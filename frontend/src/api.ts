@@ -182,7 +182,50 @@ export async function fetchGlobalTelemetry() {
   return null
 }
 
+export async function startInterviewSession(
+  sessionId: string,
+  candidate: Candidate,
+): Promise<InterviewResponse> {
+  const res = await fetch(`${API_BASE}/interview/start`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId, candidate }),
+  })
+  if (!res.ok) {
+    return startInterview(sessionId, candidate)
+  }
+  return res.json() as Promise<InterviewResponse>
+}
+
+export async function submitInterviewAnswer(
+  sessionId: string,
+  answer: string,
+  questionId?: string,
+): Promise<InterviewResponse> {
+
+  const res = await fetch(`${API_BASE}/interview/${encodeURIComponent(sessionId)}/answer`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ questionId, answer }),
+  })
+  if (!res.ok) {
+    return sendMessage(sessionId, answer)
+  }
+  return res.json() as Promise<InterviewResponse>
+}
+
+export async function getInterviewSession(sessionId: string) {
+  try {
+    const res = await fetch(`${API_BASE}/interview/${encodeURIComponent(sessionId)}`)
+    if (res.ok) return await res.json()
+  } catch (err) {
+    console.warn('Get interview session endpoint unavailable:', err)
+  }
+  return null
+}
+
 export function createSessionId(): string {
   return crypto.randomUUID()
 }
+
 

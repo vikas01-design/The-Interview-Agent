@@ -162,10 +162,34 @@ class Feedback(BaseModel):
     difficultyProgression: list[str] = Field(default_factory=list)
 
 
+class AnswerClassification(BaseModel):
+    answerType: str = "valid_technical"  # greeting_only, greeting_with_answer, valid_technical, irrelevant, knowledge_gap, empty_or_short, unclear
+    technicalAnswer: bool = True
+    accepted: bool = True
+    isGreetingOnly: bool = False
+    hasGreeting: bool = False
+    warningMessage: str | None = None
+    retryAllowed: bool = False
+    confidence: float = 1.0
+
+
+class QuestionMeta(BaseModel):
+    day: int
+    topic: str
+    question_type: QuestionType
+    difficulty: Difficulty
+    is_follow_up: bool = False
+    expectedConcepts: list[str] = Field(default_factory=list)
+    evaluationCriteria: dict[str, float] = Field(default_factory=dict)
+    selectionReason: str | None = None
+
+
 class InterviewProgress(BaseModel):
     """Real-time interview progress exposed to the frontend."""
     questionNumber: int = 0
-    minQuestions: int = 8
+    totalQuestions: int = 10
+    attemptNumber: int = 1
+    minQuestions: int = 10
     coveredDays: list[int] = Field(default_factory=list)
     minDays: int = 4
     coveredTopics: list[str] = Field(default_factory=list)
@@ -173,6 +197,9 @@ class InterviewProgress(BaseModel):
     currentTopic: str | None = None
     difficulty: str = "medium"
     isFollowUp: bool = False
+    warningMessage: str | None = None
+    retryAllowed: bool = False
+    selectionReason: str | None = None
 
 
 class InterviewResponse(BaseModel):
@@ -180,6 +207,7 @@ class InterviewResponse(BaseModel):
     done: bool = False
     feedback: Feedback | None = None
     progress: InterviewProgress | None = None
+    answerClassification: AnswerClassification | None = None
 
 
 class CodeExecutionResult(BaseModel):
@@ -195,15 +223,29 @@ class CodeExecutionResult(BaseModel):
 
 class TelemetryEvent(BaseModel):
     timestamp: str
-    eventType: str  # DIFFICULTY_SHIFT, FOLLOW_UP_TRIGGER, CODE_EXECUTION, TOPIC_PIVOT, FALLBACK_TRIGGER
+    eventType: str  # DIFFICULTY_SHIFT, FOLLOW_UP_TRIGGER, CODE_EXECUTION, TOPIC_PIVOT, FALLBACK_TRIGGER, ANSWER_VALIDATION
     title: str
     description: str
     details: dict[str, Any] = Field(default_factory=dict)
 
 
+class EvaluationDimensions(BaseModel):
+    correctness: int = Field(default=80, ge=0, le=100)
+    relevance: int = Field(default=80, ge=0, le=100)
+    depth: int = Field(default=75, ge=0, le=100)
+    completeness: int = Field(default=75, ge=0, le=100)
+    conceptualUnderstanding: int = Field(default=80, ge=0, le=100)
+    reasoning: int = Field(default=78, ge=0, le=100)
+    practicalUnderstanding: int = Field(default=75, ge=0, le=100)
+    accuracy: int = Field(default=80, ge=0, le=100)
+    communication: int = Field(default=80, ge=0, le=100)
+    confidence: int = Field(default=80, ge=0, le=100)
+
+
 class AnswerEvaluation(BaseModel):
     score: float = Field(ge=0, le=10)
     overallScore: int = Field(default=70, ge=0, le=100)
+    dimensions: EvaluationDimensions = Field(default_factory=EvaluationDimensions)
     relevance: float = Field(default=0.8, ge=0, le=1)
     technicalCorrectness: float = Field(default=0.8, ge=0, le=1)
     correctness: float = Field(default=0.8, ge=0, le=1)
@@ -211,6 +253,9 @@ class AnswerEvaluation(BaseModel):
     structure: float = Field(default=0.8, ge=0, le=1)
     reasoning: float = Field(default=0.75, ge=0, le=1)
     clarity: float = Field(default=0.8, ge=0, le=1)
+    partA_demonstrated: str | None = None
+    partB_missing: str | None = None
+    partC_strengthen: str | None = None
     strengths: list[str] = Field(default_factory=list)
     weaknesses: list[str] = Field(default_factory=list)
     misconceptions: list[str] = Field(default_factory=list)
@@ -221,6 +266,7 @@ class AnswerEvaluation(BaseModel):
     candidate_claims: list[str] = Field(default_factory=list)
     communication: CommunicationMetrics | None = None
     codeExecution: CodeExecutionResult | None = None
+    classification: AnswerClassification | None = None
 
 
 class TopicKnowledge(BaseModel):
@@ -229,14 +275,6 @@ class TopicKnowledge(BaseModel):
     reasoning: float = 0.5
     evidence: list[str] = Field(default_factory=list)
     misconceptions: list[str] = Field(default_factory=list)
-
-
-class QuestionMeta(BaseModel):
-    day: int
-    topic: str
-    question_type: QuestionType
-    difficulty: Difficulty
-    is_follow_up: bool = False
 
 
 class TranscriptEntry(BaseModel):
@@ -262,8 +300,11 @@ class InterviewSession(BaseModel):
     candidate_analysis: CandidateAnalysis
     status: str = "active"
     question_number: int = 0
+    total_questions: int = 10
+    attempt_number: int = 1
     covered_days: list[int] = Field(default_factory=list)
     covered_topics: list[str] = Field(default_factory=list)
+    question_types_used: list[str] = Field(default_factory=list)
     current_day: int | None = None
     current_topic: str | None = None
     difficulty: Difficulty = Difficulty.MEDIUM
@@ -274,9 +315,11 @@ class InterviewSession(BaseModel):
     transcript: list[TranscriptEntry] = Field(default_factory=list)
     knowledge_model: dict[str, TopicKnowledge] = Field(default_factory=dict)
     evaluations: list[AnswerEvaluation] = Field(default_factory=list)
+    classifications: list[AnswerClassification] = Field(default_factory=list)
     last_evaluation: AnswerEvaluation | None = None
     asked_questions: list[str] = Field(default_factory=list)
     last_question_meta: QuestionMeta | None = None
     awaiting_answer: bool = False
     telemetry: list[TelemetryEvent] = Field(default_factory=list)
+
 

@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import logging
 import re
-
 from datetime import datetime
 
 from app.agents.evaluator import evaluate_answer
 from app.agents.feedback_generator import generate_feedback
 from app.agents.question_generator import build_question_meta, generate_question
-from app.config import MIN_CURRICULUM_DAYS, MIN_QUESTIONS
+from app.config import MIN_CURRICULUM_DAYS, TOTAL_QUESTIONS
 from app.models.schemas import (
     Feedback,
     InterviewProgress,
@@ -18,9 +17,10 @@ from app.models.schemas import (
     TranscriptEntry,
 )
 from app.services.planner import (
+    generate_question_spec,
     handle_edge_case_message,
-    plan_next_action,
     pick_difficulty_for_day,
+    plan_next_action,
     should_end_interview,
 )
 from app.services.profile import analyze_candidate, init_knowledge_model, update_knowledge_model
@@ -48,24 +48,23 @@ def _log_telemetry(
 
 async def start_interview(session_id: str, candidate: dict) -> InterviewResponse:
     """
-    Initialize a new interview session and generate the opening question.
-
-    The opening question is chosen based on the candidate's learning journey —
-    specifically their strongest or most strategically interesting topic.
+    Initialize a new 10-question technical interview session and generate Question 1.
     """
     analysis = analyze_candidate(candidate)
     session = InterviewSession(
         session_id=session_id,
         candidate=candidate,
         candidate_analysis=analysis,
+        total_questions=TOTAL_QUESTIONS,
+        attempt_number=1,
         knowledge_model=init_knowledge_model(analysis),
     )
 
     _log_telemetry(
         session,
         "SESSION_START",
-        "Interview Session Started",
-        f"Candidate {candidate.get('member', {}).get('name', 'User')} started technical interview session.",
+        "10-Question Technical Interview Started",
+        f"Candidate {candidate.get('member', {}).get('name', 'User')} started 10-question adaptive interview.",
         {"completed_days": analysis.completed_days, "target_days": analysis.target_days},
     )
 
@@ -76,16 +75,21 @@ async def start_interview(session_id: str, candidate: dict) -> InterviewResponse
     diff = pick_difficulty_for_day(session, day)
     meta = build_question_meta(session, day, qtype, difficulty=diff)
 
+    expected, criteria = generate_question_spec(day, meta.topic, qtype)
+    meta.expectedConcepts = expected
+    meta.evaluationCriteria = criteria
+    meta.selectionReason = f"Opening question targeting Day {day} ({meta.topic}) based on cohort progress."
+
     _log_telemetry(
         session,
         "INITIAL_QUESTION_SELECTED",
-        f"Selected Opening Day {day}",
-        f"Targeting Day {day} ({meta.topic}) with difficulty {diff.value}.",
-        {"day": day, "topic": meta.topic, "difficulty": diff.value},
+        f"Question 1: Day {day} ({meta.topic})",
+        f"Targeting Day {day} with difficulty {diff.value}.",
+        {"day": day, "topic": meta.topic, "difficulty": diff.value, "reason": meta.selectionReason},
     )
 
     logger.info(
-        "Starting interview session=%s candidate=%s day=%s type=%s diff=%s",
+        "Starting 10-question interview session=%s candidate=%s day=%s type=%s diff=%s",
         session_id,
         candidate.get("member", {}).get("id"),
         day,
@@ -106,8 +110,8 @@ async def start_interview(session_id: str, candidate: dict) -> InterviewResponse
 
 async def continue_interview(session_id: str, message: str) -> InterviewResponse:
     """
-    Process a candidate's answer, evaluate it, update the knowledge model,
-    and generate the next question or final feedback.
+    Process a candidate's answer, evaluate it, update knowledge model,
+    and adaptively select the next question or generate final report on Question 10 completion.
     """
     session = get_session(session_id)
     if not session:
@@ -122,24 +126,59 @@ async def continue_interview(session_id: str, message: str) -> InterviewResponse
             done=True,
         )
 
-    # Record the candidate's message in the transcript.
+    # Record message in transcript
     session.transcript.append(TranscriptEntry(role="candidate", content=message))
 
-    # Detect edge case (very short, "I don't know", clarification requests, etc.)
-    transition_hint = handle_edge_case_message(message)
-    if transition_hint:
+    # Evaluate the answer against curriculum context & question specifications
+    evaluation = await evaluate_answer(session, message, session.last_question_meta)
+    classification = evaluation.classification
+
+    # Handle GREETING ONLY or EMPTY NON-ANSWER (when attemptNumber == 1)
+    if classification and not classification.accepted and classification.retryAllowed and session.attempt_number == 1:
+        session.attempt_number = 2
         _log_telemetry(
             session,
-            "EDGE_CASE_DETECTED",
-            "Interviewer Adaptive Pivot Triggered",
-            transition_hint,
-            {"message_snippet": message[:100]},
+            "ANSWER_VALIDATION",
+            f"Answer Validation Warning: {classification.answerType}",
+            classification.warningMessage or "Greeting or non-answer detected.",
+            {"attempt": 1, "warning": classification.warningMessage},
+        )
+        save_session(session)
+
+        # Return dynamic warning without incrementing question count or evaluating score
+        warning_reply = classification.warningMessage or (
+            f"That response doesn't address the technical question yet. "
+            f"Please answer the question in your own words so I can evaluate your understanding."
+        )
+        session.transcript.append(TranscriptEntry(role="interviewer", content=warning_reply))
+
+        return InterviewResponse(
+            reply=warning_reply,
+            done=False,
+            answerClassification=classification,
+            progress=_build_progress(session, warning=warning_reply, retry_allowed=True),
         )
 
-    # Evaluate the answer against the curriculum and interview context.
-    evaluation = await evaluate_answer(session, message, session.last_question_meta)
+    # Reset attempt counter on evaluated answer (valid or attempt 2)
+    session.attempt_number = 1
     session.evaluations.append(evaluation)
     session.last_evaluation = evaluation
+
+    if classification:
+        session.classifications.append(classification)
+
+    _log_telemetry(
+        session,
+        "ANSWER_EVALUATED",
+        f"Q{session.question_number} Evaluated: Score {int(evaluation.overallScore)}/100",
+        f"Demonstrated: {evaluation.partA_demonstrated}",
+        {
+            "score": evaluation.overallScore,
+            "answerType": classification.answerType if classification else "valid_technical",
+            "partA": evaluation.partA_demonstrated,
+            "partB": evaluation.partB_missing,
+        },
+    )
 
     if evaluation.codeExecution and evaluation.codeExecution.executed:
         _log_telemetry(
@@ -152,59 +191,54 @@ async def continue_interview(session_id: str, message: str) -> InterviewResponse
                 "passed": evaluation.codeExecution.passed,
                 "stdout": evaluation.codeExecution.stdout[:200],
                 "stderr": evaluation.codeExecution.stderr[:200],
-                "executionTimeMs": evaluation.codeExecution.executionTimeMs,
             },
         )
 
-    logger.info(
-        "session=%s Q%d score=%.1f depth=%.2f misconceptions=%s",
-        session_id,
-        session.question_number,
-        evaluation.score,
-        evaluation.depth,
-        evaluation.misconceptions,
-    )
-
-    # Update the dynamic candidate knowledge model for the current topic.
+    # Update knowledge model for current topic
     if session.current_day is not None:
         update_knowledge_model(session.knowledge_model, session.current_day, evaluation)
 
-    # Check termination conditions (deterministic — not LLM-controlled).
+    # Check termination gate (exactly 10 evaluated questions)
     if should_end_interview(session):
         return await _complete_interview(session)
 
+    # Plan next question
     old_diff = session.difficulty
-    # Plan the next question (deterministic priority logic).
-    day, qtype, diff, is_follow_up, plan_transition = plan_next_action(session, evaluation, message)
+    day, qtype, diff, is_follow_up, plan_transition, selection_reason = plan_next_action(
+        session, evaluation, message
+    )
     meta = build_question_meta(session, day, qtype, is_follow_up=is_follow_up, difficulty=diff)
+
+    expected, criteria = generate_question_spec(day, meta.topic, qtype)
+    meta.expectedConcepts = expected
+    meta.evaluationCriteria = criteria
+    meta.selectionReason = selection_reason
 
     if diff != old_diff:
         _log_telemetry(
             session,
             "DIFFICULTY_SHIFT",
             f"Difficulty Shifted: {old_diff.value.upper()} → {diff.value.upper()}",
-            f"Adjusted question difficulty based on evaluation score {evaluation.score}/10.",
-            {"old_difficulty": old_diff.value, "new_difficulty": diff.value, "score": evaluation.score},
+            f"Adjusted difficulty based on score {evaluation.overallScore}/100.",
+            {"old_difficulty": old_diff.value, "new_difficulty": diff.value},
         )
 
-    # Update follow-up tracking.
     if is_follow_up:
         session.follow_up_depth += 1
         session.pending_follow_up = True
         _log_telemetry(
             session,
             "FOLLOW_UP_TRIGGER",
-            f"Follow-up Probing Triggered (Depth {session.follow_up_depth})",
-            f"Deepening probe on topic '{meta.topic}' due to answer evaluation signals.",
+            f"Follow-up Probing (Depth {session.follow_up_depth})",
+            selection_reason,
             {"topic": meta.topic, "depth": session.follow_up_depth},
         )
     else:
         session.follow_up_depth = 0
         session.pending_follow_up = False
 
-    effective_transition = plan_transition or transition_hint
+    effective_transition = plan_transition
 
-    # Generate the next question (AI-powered, grounded in TheBreeth + curriculum).
     question = await generate_question(
         session,
         meta,
@@ -217,15 +251,15 @@ async def continue_interview(session_id: str, message: str) -> InterviewResponse
     return InterviewResponse(
         reply=question,
         done=False,
-        progress=_build_progress(session),
+        answerClassification=classification,
+        progress=_build_progress(session, selection_reason=selection_reason),
     )
 
 
-
 async def _complete_interview(session: InterviewSession) -> InterviewResponse:
-    """Generate final feedback report with grading system and mark the session complete."""
+    """Generate final 10-question evaluation report and mark session complete."""
     logger.info(
-        "Completing interview session=%s questions=%d days_covered=%s",
+        "Completing 10-question interview session=%s questions=%d days_covered=%s",
         session.session_id,
         session.question_number,
         session.covered_days,
@@ -242,15 +276,14 @@ async def _complete_interview(session: InterviewSession) -> InterviewResponse:
 
     name = session.candidate.get("member", {}).get("name", "there")
     closing = (
-        f"Thank you for attending the technical interview, {name}! "
-        f"You have completed all {session.question_number} technical questions across cohort Days {session.covered_days}. "
-        f"I have compiled your full evaluation results, performance grade, strengths, drawbacks, and recommended improvements below."
+        f"Thank you for completing the technical interview, {name}! "
+        f"You have finished all 10 technical questions across cohort Days {session.covered_days}. "
+        f"I have compiled your comprehensive 10-question evaluation report, performance scores, strengths, areas for improvement, and next steps below."
     )
     return InterviewResponse(reply=closing, done=True, feedback=feedback)
 
 
 def _record_question(session: InterviewSession, question: str, meta) -> None:
-    """Record a new question in the session state."""
     normalized = _normalize_question(question)
     session.asked_questions.append(normalized)
     session.question_number += 1
@@ -264,33 +297,30 @@ def _record_question(session: InterviewSession, question: str, meta) -> None:
         session.covered_days.append(meta.day)
     if meta.topic not in session.covered_topics:
         session.covered_topics.append(meta.topic)
+    if meta.question_type.value not in session.question_types_used:
+        session.question_types_used.append(meta.question_type.value)
 
     session.transcript.append(
         TranscriptEntry(role="interviewer", content=question, question_meta=meta)
     )
 
-    logger.debug(
-        "Q%d recorded: day=%d topic=%s type=%s difficulty=%s follow_up=%s",
-        session.question_number,
-        meta.day,
-        meta.topic,
-        meta.question_type.value,
-        meta.difficulty.value,
-        meta.is_follow_up,
-    )
-
 
 def _normalize_question(text: str) -> str:
-    """Normalize a question for deduplication checking."""
     return re.sub(r"\s+", " ", text.strip().lower())[:200]
 
 
-def _build_progress(session: InterviewSession) -> InterviewProgress:
-    """Build a progress snapshot to send to the frontend."""
-    from app.config import MIN_CURRICULUM_DAYS, MIN_QUESTIONS
+def _build_progress(
+    session: InterviewSession,
+    *,
+    warning: str | None = None,
+    retry_allowed: bool = False,
+    selection_reason: str | None = None,
+) -> InterviewProgress:
     return InterviewProgress(
         questionNumber=session.question_number,
-        minQuestions=MIN_QUESTIONS,
+        totalQuestions=TOTAL_QUESTIONS,
+        attemptNumber=session.attempt_number,
+        minQuestions=TOTAL_QUESTIONS,
         coveredDays=session.covered_days,
         minDays=MIN_CURRICULUM_DAYS,
         coveredTopics=session.covered_topics,
@@ -298,4 +328,7 @@ def _build_progress(session: InterviewSession) -> InterviewProgress:
         currentTopic=session.current_topic,
         difficulty=session.difficulty.value,
         isFollowUp=session.pending_follow_up,
+        warningMessage=warning,
+        retryAllowed=retry_allowed,
+        selectionReason=selection_reason or (session.last_question_meta.selectionReason if session.last_question_meta else None),
     )

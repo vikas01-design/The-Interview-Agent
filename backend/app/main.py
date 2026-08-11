@@ -181,6 +181,47 @@ async def compare_resume_endpoint(request: ResumeCompareRequest) -> RoleComparis
     )
 
 
+class StartInterviewRequest(BaseModel):
+    sessionId: str
+    candidate: dict
+
+
+class AnswerInterviewRequest(BaseModel):
+    questionId: str | None = None
+    answer: str
+
+
+@app.post("/api/interview/start", response_model=InterviewResponse)
+async def start_interview_endpoint(request: StartInterviewRequest) -> InterviewResponse:
+    """Start a new 10-question adaptive technical interview session."""
+    return await start_interview(request.sessionId, request.candidate)
+
+
+@app.post("/api/interview/{session_id}/answer", response_model=InterviewResponse)
+async def submit_answer_endpoint(session_id: str, request: AnswerInterviewRequest) -> InterviewResponse:
+    """Submit candidate answer for semantic evaluation & receive next adaptive question or warning."""
+    return await continue_interview(session_id, request.answer)
+
+
+@app.get("/api/interview/{session_id}")
+async def get_interview_session_endpoint(session_id: str) -> dict:
+    """Get full state of an interview session."""
+    session = get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return session.dict()
+
+
+@app.post("/api/interview/{session_id}/complete", response_model=InterviewResponse)
+async def complete_interview_endpoint(session_id: str) -> InterviewResponse:
+    """Force complete an interview session and generate the final report."""
+    session = get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    from app.services.orchestrator import _complete_interview
+    return await _complete_interview(session)
+
+
 @app.post("/api/interview", response_model=InterviewResponse)
 async def interview_endpoint(request: InterviewRequest) -> InterviewResponse:
     if not request.sessionId:
@@ -196,6 +237,7 @@ async def interview_endpoint(request: InterviewRequest) -> InterviewResponse:
         status_code=400,
         detail="Provide candidate to start or message to continue the interview.",
     )
+
 
 
 @app.get("/api/interview/{session_id}/telemetry")

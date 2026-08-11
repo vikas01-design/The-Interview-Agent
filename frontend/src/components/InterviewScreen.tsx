@@ -635,11 +635,23 @@ export function InterviewScreen({
               </NeuCard>
             )}
 
+            {progress?.warningMessage && (
+              <NeuCard color="cream" className="p-3 sm:p-4 border-2 border-black bg-[#FFDC8B]">
+                <div className="flex items-center gap-2 font-mono text-xs font-black text-black">
+                  <span className="bg-black text-white px-2 py-0.5 text-[10px]">VALIDATION WARNING</span>
+                </div>
+                <p className="font-mono text-xs sm:text-sm font-bold text-black mt-1">
+                  ⚠️ {progress.warningMessage}
+                </p>
+              </NeuCard>
+            )}
+
             {error && (
               <NeuCard color="pink" className="p-4">
                 <p className="font-mono text-xs font-black text-black">⚠ {error}</p>
               </NeuCard>
             )}
+
 
             <div ref={bottomRef} />
           </div>

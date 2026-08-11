@@ -28,5 +28,7 @@ BREETH_GROUP_ID = os.getenv("BREETH_GROUP_ID", "curriculum")
 
 LLM_ENABLED = os.getenv("LLM_ENABLED", "true").lower() == "true" and bool(OPENAI_API_KEY)
 
-MIN_QUESTIONS = 8
+TOTAL_QUESTIONS = 10
+MIN_QUESTIONS = 10
 MIN_CURRICULUM_DAYS = 4
+

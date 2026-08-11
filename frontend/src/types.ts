@@ -151,6 +151,8 @@ export interface Feedback {
 
 export interface InterviewProgress {
   questionNumber: number
+  totalQuestions?: number
+  attemptNumber?: number
   minQuestions: number
   coveredDays: number[]
   minDays: number
@@ -159,7 +161,11 @@ export interface InterviewProgress {
   currentTopic: string | null
   difficulty: 'easy' | 'medium' | 'hard'
   isFollowUp: boolean
+  warningMessage?: string | null
+  retryAllowed?: boolean
+  selectionReason?: string | null
 }
+
 
 export interface InterviewResponse {
   reply: string
