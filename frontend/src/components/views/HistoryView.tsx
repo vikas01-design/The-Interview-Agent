@@ -1,7 +1,10 @@
 import { NeuCard } from '../neu/NeuCard'
 import { NeuBadge } from '../neu/NeuBadge'
+import { NeuButton } from '../neu/NeuButton'
+import { ClippedHeading } from '../neu/ClippedHeading'
 import type { Candidate } from '../../types'
 import { loadUserCandidateData } from '../../utils/candidateStore'
+import { useScrollReveal } from '../../utils/useScrollReveal'
 
 interface Props {
   candidate: Candidate
@@ -9,6 +12,7 @@ interface Props {
 }
 
 export function HistoryView({ candidate, onStartInterviewClick }: Props) {
+  useScrollReveal()
   const userData = loadUserCandidateData(candidate.member.id, candidate.member.name)
   const sessions = userData.sessions
 
@@ -16,27 +20,36 @@ export function HistoryView({ candidate, onStartInterviewClick }: Props) {
     <div className="max-w-7xl mx-auto space-y-10 md:space-y-12 pb-12">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-3 border-black pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-3 border-black pb-4 reveal-on-scroll">
         <div className="space-y-2">
           <NeuBadge variant="cyan">ARCHIVE</NeuBadge>
-          <h1 className="text-3xl md:text-5xl font-black uppercase text-black">
+          
+          <ClippedHeading
+            as="h1"
+            innerClassName="text-clamp-heading font-black uppercase text-black"
+            immediate={true}
+          >
             INTERVIEW HISTORY
-          </h1>
+          </ClippedHeading>
+
           <p className="text-sm font-bold text-slate-700">
             Historical technical interview records and report logs for candidate {candidate.member.name}.
           </p>
         </div>
 
-        <button
+        <NeuButton
+          variant="yellow"
+          size="md"
           onClick={onStartInterviewClick}
-          className="neu-btn bg-[#F7CB46] text-black px-6 py-3 font-black text-sm uppercase self-start md:self-auto"
+          className="self-start md:self-auto shadow-neu-sm"
+          snapScale={true}
         >
           START NEW INTERVIEW →
-        </button>
+        </NeuButton>
       </div>
 
       {/* History Table */}
-      <NeuCard color="white" className="p-0 overflow-hidden">
+      <NeuCard color="white" className="p-0 overflow-hidden reveal-on-scroll" hoverSnap={true}>
         <div className="overflow-x-auto">
           <table className="w-full text-left font-mono text-xs">
             <thead className="bg-[#FFFDF6] border-b-3 border-black font-black uppercase text-black">

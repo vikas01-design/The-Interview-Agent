@@ -5,6 +5,7 @@ interface NeuButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'yellow' | 'pink' | 'cyan' | 'green' | 'black' | 'white'
   size?: 'sm' | 'md' | 'lg'
   className?: string
+  snapScale?: boolean
 }
 
 export function NeuButton({
@@ -12,6 +13,7 @@ export function NeuButton({
   variant = 'yellow',
   size = 'md',
   className = '',
+  snapScale = true,
   ...props
 }: NeuButtonProps) {
   const variantClasses = {
@@ -29,9 +31,15 @@ export function NeuButton({
     lg: 'px-7 py-3.5 text-base',
   }[size]
 
+  // Sudden 1-to-1 scale snaps and fast industrial timing (0% blur)
+  const scaleClasses = snapScale
+    ? 'neu-btn-snap transform active:scale-95 hover:scale-102 transition-all duration-100 ease-out'
+    : 'neu-btn'
+
   return (
     <button
-      className={`neu-btn rounded-none font-bold uppercase tracking-wider ${variantClasses} ${sizeClasses} ${className}`}
+      className={`${scaleClasses} rounded-none font-bold uppercase tracking-wider ${variantClasses} ${sizeClasses} ${className}`}
+      style={{ filter: 'none' }}
       {...props}
     >
       {children}

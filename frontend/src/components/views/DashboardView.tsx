@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { NeuCard } from '../neu/NeuCard'
 import { NeuButton } from '../neu/NeuButton'
 import { NeuBadge } from '../neu/NeuBadge'
+import { ClippedHeading } from '../neu/ClippedHeading'
 import type { Candidate, Mission } from '../../types'
 import { loadUserCandidateData } from '../../utils/candidateStore'
 import { EditCareerTargetModal } from '../EditCareerTargetModal'
 import { DayDetailModal } from '../DayDetailModal'
+import { useScrollReveal } from '../../utils/useScrollReveal'
 
 interface Props {
   candidate: Candidate
@@ -23,6 +25,9 @@ export function DashboardView({
   const member = candidate.member
   const userData = loadUserCandidateData(member.id, member.name)
   
+  // Enable industrial snappy scroll trigger animations
+  useScrollReveal()
+
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null)
 
@@ -31,7 +36,6 @@ export function DashboardView({
   const yearsExperience = userData.yearsExperience ?? member.yearsExperience ?? 3
 
   // Real Metric Calculations — Strict Rules:
-  // If candidate has attended NO interviews: Score is 0, Knowledge is 0%, Comm is 0%
   const hasSessions = sessions.length > 0
   const avgScore = hasSessions ? Math.round(sessions.reduce((acc, s) => acc + s.score, 0) / sessions.length) : 0
   const avgTech = hasSessions ? Math.round(sessions.reduce((acc, s) => acc + s.technicalKnowledge, 0) / sessions.length) : 0
@@ -77,7 +81,7 @@ export function DashboardView({
     <div className="space-y-10 md:space-y-12 max-w-7xl mx-auto pb-12 font-sans text-black">
       
       {/* Welcome Command Banner with Editable Career Target */}
-      <NeuCard color="yellow" className="p-6 md:p-8 border-3 border-black shadow-neu-lg">
+      <NeuCard color="yellow" className="p-6 md:p-8 border-3 border-black shadow-neu-lg reveal-on-scroll" hoverSnap={true}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           
           <div className="space-y-3">
@@ -88,9 +92,14 @@ export function DashboardView({
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-black uppercase leading-none">
+            {/* Typography Spec: Whole heading sliding up from clipped container */}
+            <ClippedHeading
+              as="h1"
+              innerClassName="text-clamp-heading font-black tracking-tight text-black uppercase leading-none"
+              immediate={true}
+            >
               WELCOME BACK, {member.name.toUpperCase()}!
-            </h1>
+            </ClippedHeading>
 
             {/* Editable Target Position Pill */}
             <div className="flex flex-wrap items-center gap-2 pt-1 font-mono text-xs font-bold text-slate-900">
@@ -106,6 +115,7 @@ export function DashboardView({
                 size="sm"
                 className="text-xs px-2.5 py-1 hover:bg-[#FE90E8]"
                 onClick={() => setEditModalOpen(true)}
+                snapScale={true}
               >
                 ✏️ EDIT
               </NeuButton>
@@ -114,10 +124,10 @@ export function DashboardView({
 
           {/* Action CTAs */}
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <NeuButton variant="black" size="lg" onClick={() => onStartInterviewClick()} className="shadow-neu-lg">
+            <NeuButton variant="black" size="lg" onClick={() => onStartInterviewClick()} className="shadow-neu-lg" snapScale={true}>
               START INTERVIEW →
             </NeuButton>
-            <NeuButton variant="pink" size="lg" onClick={onOpenResumeClick} className="shadow-neu-lg">
+            <NeuButton variant="pink" size="lg" onClick={onOpenResumeClick} className="shadow-neu-lg" snapScale={true}>
               RESUME AI ⚡
             </NeuButton>
           </div>
@@ -125,11 +135,11 @@ export function DashboardView({
         </div>
       </NeuCard>
 
-      {/* Primary Metrics Grid (Strict Real-Time Data Rules) */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Primary Metrics Grid Spec: repeat(auto-fit, minmax(250px, 1fr)) */}
+      <div className="responsive-grid">
         
         {/* Metric 1: Interview Score */}
-        <NeuCard color="white" className="border-3 border-black shadow-neu neu-card-hover">
+        <NeuCard color="white" className="border-3 border-black shadow-neu" hoverSnap={true} revealOnScroll={true}>
           <div className="flex items-center justify-between">
             <span className="font-mono text-xs font-black uppercase text-slate-500">INTERVIEW SCORE</span>
             <span className="h-2 w-2 rounded-full bg-black"></span>
@@ -145,7 +155,7 @@ export function DashboardView({
         </NeuCard>
 
         {/* Metric 2: Technical Knowledge */}
-        <NeuCard color="cyan" className="border-3 border-black shadow-neu neu-card-hover">
+        <NeuCard color="cyan" className="border-3 border-black shadow-neu" hoverSnap={true} revealOnScroll={true}>
           <span className="font-mono text-xs font-black uppercase text-slate-800">TECHNICAL KNOWLEDGE</span>
           <div className="mt-3 text-5xl font-black font-mono text-black tabular-nums">{avgTech}%</div>
           <p className="mt-2 text-xs font-bold text-slate-800 font-mono">
@@ -154,7 +164,7 @@ export function DashboardView({
         </NeuCard>
 
         {/* Metric 3: Communication */}
-        <NeuCard color="pink" className="border-3 border-black shadow-neu neu-card-hover">
+        <NeuCard color="pink" className="border-3 border-black shadow-neu" hoverSnap={true} revealOnScroll={true}>
           <span className="font-mono text-xs font-black uppercase text-slate-800">COMMUNICATION</span>
           <div className="mt-3 text-5xl font-black font-mono text-black tabular-nums">{avgComm}%</div>
           <p className="mt-2 text-xs font-bold text-slate-800 font-mono">
@@ -163,7 +173,7 @@ export function DashboardView({
         </NeuCard>
 
         {/* Metric 4: Resume Match */}
-        <NeuCard color="green" className="border-3 border-black shadow-neu neu-card-hover">
+        <NeuCard color="green" className="border-3 border-black shadow-neu" hoverSnap={true} revealOnScroll={true}>
           <span className="font-mono text-xs font-black uppercase text-slate-800">RESUME MATCH</span>
           <div className="mt-3 text-5xl font-black font-mono text-black tabular-nums">{resumeScore}%</div>
           <p className="mt-2 text-xs font-bold text-slate-800 font-mono truncate">
@@ -173,7 +183,7 @@ export function DashboardView({
             <div className="mt-2">
               <button
                 onClick={onOpenResumeClick}
-                className="font-mono text-[10px] font-black uppercase text-black bg-[#99E885] border border-black px-2 py-1 shadow-neu-sm hover:underline"
+                className="font-mono text-[10px] font-black uppercase text-black bg-[#99E885] border border-black px-2 py-1 shadow-neu-sm neu-btn-snap"
               >
                 UPLOAD RESUME →
               </button>
@@ -183,34 +193,36 @@ export function DashboardView({
 
       </div>
 
-      {/* Candidate Intelligence Section (Strict Real-Time Data Rule) */}
+      {/* Candidate Intelligence Section */}
       {!hasSessions ? (
-        /* EMPTY STATE: DO NOT SHOW FAKE / DEFAULT DATA IF NO INTERVIEW ATTENDED */
-        <NeuCard color="white" className="border-3 border-black shadow-neu p-8 text-center space-y-4">
+        <NeuCard color="white" className="border-3 border-black shadow-neu p-8 text-center space-y-4 reveal-on-scroll">
           <div className="mx-auto flex h-14 w-14 items-center justify-center border-3 border-black bg-[#FFDC8B] font-mono text-2xl font-black shadow-neu-sm">
             📊
           </div>
           <div className="space-y-1">
-            <h3 className="font-mono text-xl font-black uppercase text-black">NO INTERVIEW DATA ATTENDED YET</h3>
+            <ClippedHeading as="h3" innerClassName="font-mono text-xl font-black uppercase text-black">
+              NO INTERVIEW DATA ATTENDED YET
+            </ClippedHeading>
             <p className="font-mono text-xs font-bold text-slate-700 max-w-xl mx-auto leading-relaxed">
               Candidate intelligence, strongest technical areas, and revision requirements are generated live from actual interview evaluations. Attend your first interview session to unlock your real-time skill analytics.
             </p>
           </div>
           <div className="pt-2">
-            <NeuButton variant="yellow" size="lg" className="px-8 py-3.5 shadow-neu-sm" onClick={() => onStartInterviewClick()}>
+            <NeuButton variant="yellow" size="lg" className="px-8 py-3.5 shadow-neu-sm" onClick={() => onStartInterviewClick()} snapScale={true}>
               START FIRST INTERVIEW NOW →
             </NeuButton>
           </div>
         </NeuCard>
       ) : (
-        /* REAL-TIME CANDIDATE INTELLIGENCE FOR INTERVIEWED CANDIDATES */
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="responsive-grid">
           
           {/* Strongest Areas */}
-          <NeuCard color="white" className="space-y-6 border-3 border-black shadow-neu">
+          <NeuCard color="white" className="space-y-6 border-3 border-black shadow-neu" hoverSnap={true} revealOnScroll={true}>
             <div className="flex items-center justify-between border-b-3 border-black pb-3">
               <div>
-                <h3 className="font-black text-xl uppercase tracking-tight text-black">CANDIDATE INTELLIGENCE — STRENGTHS</h3>
+                <ClippedHeading as="h3" innerClassName="font-black text-xl uppercase tracking-tight text-black">
+                  CANDIDATE INTELLIGENCE — STRENGTHS
+                </ClippedHeading>
                 <p className="font-mono text-xs text-slate-600 font-bold">Real-time evaluation data for {currentRole}</p>
               </div>
               <NeuBadge variant="green">HIGH PROFICIENCY</NeuBadge>
@@ -239,10 +251,12 @@ export function DashboardView({
           </NeuCard>
 
           {/* Needs Attention */}
-          <NeuCard color="white" className="space-y-6 border-3 border-black shadow-neu">
+          <NeuCard color="white" className="space-y-6 border-3 border-black shadow-neu" hoverSnap={true} revealOnScroll={true}>
             <div className="flex items-center justify-between border-b-3 border-black pb-3">
               <div>
-                <h3 className="font-black text-xl uppercase tracking-tight text-black">NEEDS ATTENTION & REVISION</h3>
+                <ClippedHeading as="h3" innerClassName="font-black text-xl uppercase tracking-tight text-black">
+                  NEEDS ATTENTION & REVISION
+                </ClippedHeading>
                 <p className="font-mono text-xs text-slate-600 font-bold">Identified gaps from actual answers</p>
               </div>
               <NeuBadge variant="pink">ACTION REQUIRED</NeuBadge>
@@ -274,7 +288,7 @@ export function DashboardView({
       )}
 
       {/* 31-Day Cohort Journey Responsive Calendar Grid */}
-      <NeuCard color="cream" className="border-3 border-black shadow-neu-lg p-6 md:p-8">
+      <NeuCard color="cream" className="border-3 border-black shadow-neu-lg p-6 md:p-8 reveal-on-scroll" hoverSnap={true}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-3 border-black pb-4 mb-6">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -285,9 +299,9 @@ export function DashboardView({
                 </span>
               )}
             </div>
-            <h3 className="text-2xl sm:text-3xl font-black uppercase text-black">
+            <ClippedHeading as="h3" innerClassName="text-2xl sm:text-3xl font-black uppercase text-black">
               31-DAY TECHNICAL ENGINEERING PROGRAM
-            </h3>
+            </ClippedHeading>
           </div>
 
           <div className="font-mono text-sm font-black bg-white border-3 border-black px-4 py-2 shadow-neu-sm shrink-0">
@@ -295,8 +309,8 @@ export function DashboardView({
           </div>
         </div>
 
-        {/* Calendar Grid of 31 Days */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 font-mono">
+        {/* Calendar Grid of 31 Days using responsive-grid */}
+        <div className="responsive-grid font-mono">
           {missions.map((m) => {
             const st = getDayStatusStyle(m.status, m.passed, m.skipped)
             const isCurrent = currentMission && currentMission.day === m.day
@@ -304,7 +318,7 @@ export function DashboardView({
               <button
                 key={m.day}
                 onClick={() => setSelectedMission(m)}
-                className={`p-3 border-2 text-left transition-all hover:-translate-y-1 shadow-neu-sm flex flex-col justify-between min-h-[95px] relative group ${
+                className={`p-3 border-2 text-left transition-all neu-btn-snap shadow-neu-sm flex flex-col justify-between min-h-[95px] relative group ${
                   st.bg
                 } ${st.border} ${st.text}`}
               >

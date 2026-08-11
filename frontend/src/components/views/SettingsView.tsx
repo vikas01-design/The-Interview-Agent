@@ -1,15 +1,25 @@
 import { NeuCard } from '../neu/NeuCard'
 import { NeuBadge } from '../neu/NeuBadge'
+import { ClippedHeading } from '../neu/ClippedHeading'
+import { useScrollReveal } from '../../utils/useScrollReveal'
 
 export function SettingsView() {
+  useScrollReveal()
+
   return (
     <div className="max-w-5xl mx-auto space-y-10 md:space-y-12 pb-12">
       {/* Header */}
-      <div className="space-y-2 border-b-3 border-black pb-4">
+      <div className="space-y-2 border-b-3 border-black pb-4 reveal-on-scroll">
         <NeuBadge variant="black">SYSTEM CONFIG</NeuBadge>
-        <h1 className="text-3xl md:text-5xl font-black uppercase text-black">
+        
+        <ClippedHeading
+          as="h1"
+          innerClassName="text-clamp-heading font-black uppercase text-black"
+          immediate={true}
+        >
           SYSTEM SETTINGS
-        </h1>
+        </ClippedHeading>
+
         <p className="text-sm font-bold text-slate-700">
           Environment configuration, LLM service status, and retrieval engine parameters.
         </p>
@@ -17,9 +27,9 @@ export function SettingsView() {
 
       {/* Settings Grid */}
       <div className="space-y-6">
-        <NeuCard color="white" className="space-y-4">
+        <NeuCard color="white" className="space-y-4" hoverSnap={true} revealOnScroll={true}>
           <h3 className="font-black text-lg uppercase border-b-2 border-black pb-2">1. LLM SERVICE PROVIDER</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="responsive-grid">
             <div>
               <label className="block text-xs font-mono font-black uppercase text-slate-800 mb-1">Active LLM API</label>
               <input
@@ -41,7 +51,7 @@ export function SettingsView() {
           </div>
         </NeuCard>
 
-        <NeuCard color="cyan" className="space-y-4">
+        <NeuCard color="cyan" className="space-y-4" hoverSnap={true} revealOnScroll={true}>
           <h3 className="font-black text-lg uppercase border-b-2 border-black pb-2">2. THEBREETH GRAPH RETRIEVAL ENGINE</h3>
           <div className="space-y-2 font-mono text-xs font-bold">
             <div className="flex justify-between p-2 bg-white border-2 border-black">

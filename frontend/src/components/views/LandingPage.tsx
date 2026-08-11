@@ -4,6 +4,8 @@ import { NeuCard } from '../neu/NeuCard'
 import { NeuButton } from '../neu/NeuButton'
 import { NeuBadge } from '../neu/NeuBadge'
 import { NeoBrutalCharacter } from '../neu/NeoBrutalCharacter'
+import { ClippedHeading } from '../neu/ClippedHeading'
+import { useScrollReveal } from '../../utils/useScrollReveal'
 
 interface LandingPageProps {
   onEnterDashboard: () => void
@@ -39,6 +41,9 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   const [typedText, setTypedText] = useState('')
   const fullText = "I measure Recall@K and Mean Reciprocal Rank (MRR) across evaluation datasets, and implement semantic similarity thresholding to filter noise."
+
+  // Activate scroll observer for industrial snappy reveal animations
+  useScrollReveal()
 
   useEffect(() => {
     let index = 0
@@ -116,12 +121,18 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
             </NeuBadge>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black uppercase tracking-tight text-black leading-[1.1]">
+          {/* Typography - The whole heading sliding up from a clipped container */}
+          <ClippedHeading
+            as="h1"
+            className="w-full text-center"
+            innerClassName="text-clamp-hero font-black uppercase tracking-tight text-black leading-[1.05]"
+            immediate={true}
+          >
             THE TECHNICAL INTERVIEW PLATFORM THAT THINKS LIKE A{' '}
             <span className="bg-[#F7CB46] px-3 py-1 border-3 border-black inline-block shadow-neu-lg hover:rotate-1 hover:scale-105 transition-transform cursor-pointer">
               SENIOR ARCHITECT.
             </span>
-          </h1>
+          </ClippedHeading>
 
           <p className="text-base sm:text-lg font-bold text-slate-800 max-w-3xl mx-auto leading-relaxed">
             Conduct adaptive, role-aware technical interviews with real-time multi-dimensional answer evaluation, graph retrieval, and role-matched resume scoring.
@@ -131,8 +142,9 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
             <NeuButton
               variant="yellow"
               size="lg"
-              className="shadow-neu-lg px-8 py-4 text-base hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_#000000] transition-all"
+              className="shadow-neu-lg px-8 py-4 text-base"
               onClick={onEnterDashboard}
+              snapScale={true}
             >
               ENTER DASHBOARD NOW →
             </NeuButton>
@@ -140,8 +152,9 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
             <NeuButton
               variant="cyan"
               size="lg"
-              className="shadow-neu-lg px-8 py-4 text-base hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_#000000] transition-all"
+              className="shadow-neu-lg px-8 py-4 text-base"
               onClick={onOpenResumeAI}
+              snapScale={true}
             >
               TRY ROLE-AWARE RESUME AI ⚡
             </NeuButton>
@@ -149,7 +162,7 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
         </div>
 
         {/* Neo-Brutalist Character & Emotion Shuttle Showcase Section */}
-        <div id="interviewer" className="max-w-5xl mx-auto space-y-4 pt-4">
+        <div id="interviewer" className="max-w-5xl mx-auto space-y-4 pt-4 reveal-on-scroll">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b-3 border-black pb-2 font-mono">
             <div className="flex items-center gap-2">
               <span className="bg-black text-[#F7CB46] px-2 py-0.5 font-black text-xs">AI INTERVIEWER PERSONA</span>
@@ -162,7 +175,11 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
         </div>
 
         {/* Hero Interactive Console Preview Card with Animated Typing & Live Signal Meters */}
-        <NeuCard color="white" className="max-w-5xl mx-auto p-6 md:p-8 space-y-6 shadow-neu-lg neu-card-hover border-3 border-black">
+        <NeuCard
+          color="white"
+          className="max-w-5xl mx-auto p-6 md:p-8 space-y-6 shadow-neu-lg border-3 border-black reveal-on-scroll"
+          hoverSnap={true}
+        >
           <div className="flex flex-wrap items-center justify-between gap-4 border-b-3 border-black pb-4">
             <div className="flex items-center gap-3">
               <NeuBadge variant="yellow">LIVE CONSOLE PREVIEW</NeuBadge>
@@ -232,16 +249,20 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
           <div className="space-y-6">
             <NeuBadge variant="black">OUR MISSION — PREPARING TOMORROW'S WORKFORCE</NeuBadge>
             
-            <h2 className="text-3xl sm:text-5xl font-black uppercase text-black leading-tight">
+            {/* Clipped Heading sliding up from container */}
+            <ClippedHeading
+              as="h2"
+              innerClassName="text-clamp-heading font-black uppercase text-black leading-tight"
+            >
               THE INTERVIEW PREP PLATFORM THAT THINKS LIKE A REAL INTERVIEWER
-            </h2>
+            </ClippedHeading>
 
             <p className="text-sm sm:text-base font-bold text-slate-900 leading-relaxed">
               Most interview prep tools give candidates static lists of questions. Our AI conducts real conversation, listens to every answer, adapts follow-up questions in real time, and evaluates performance across 10+ dimensions.
             </p>
 
             <div className="space-y-4 pt-2">
-              <div className="border-2 border-black bg-white p-4 space-y-1 shadow-neu-sm hover:-translate-y-1 transition-transform">
+              <div className="border-2 border-black bg-white p-4 space-y-1 shadow-neu-sm neu-btn-snap reveal-on-scroll">
                 <h4 className="font-black text-sm uppercase text-black flex items-center gap-2">
                   <span>⚡</span> Practice Realistic Scenarios
                 </h4>
@@ -250,7 +271,7 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
                 </p>
               </div>
 
-              <div className="border-2 border-black bg-white p-4 space-y-1 shadow-neu-sm hover:-translate-y-1 transition-transform">
+              <div className="border-2 border-black bg-white p-4 space-y-1 shadow-neu-sm neu-btn-snap reveal-on-scroll">
                 <h4 className="font-black text-sm uppercase text-black flex items-center gap-2">
                   <span>📊</span> Measure What Matters
                 </h4>
@@ -259,7 +280,7 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
                 </p>
               </div>
 
-              <div className="border-2 border-black bg-white p-4 space-y-1 shadow-neu-sm hover:-translate-y-1 transition-transform">
+              <div className="border-2 border-black bg-white p-4 space-y-1 shadow-neu-sm neu-btn-snap reveal-on-scroll">
                 <h4 className="font-black text-sm uppercase text-black flex items-center gap-2">
                   <span>🎯</span> Build Lasting Confidence
                 </h4>
@@ -270,7 +291,11 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
             </div>
           </div>
 
-          <NeuCard color="yellow" className="p-8 space-y-6 shadow-neu-lg neu-card-hover border-3 border-black">
+          <NeuCard
+            color="yellow"
+            className="p-8 space-y-6 shadow-neu-lg border-3 border-black reveal-on-scroll"
+            hoverSnap={true}
+          >
             <NeuBadge variant="black">CANDIDATE INTELLIGENCE SHOWCASE</NeuBadge>
             <h3 className="text-2xl font-black uppercase text-black">LIVE SIGNAL TRACKING</h3>
 
@@ -291,7 +316,7 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
               </div>
             </div>
 
-            <NeuButton variant="black" className="w-full py-3 hover:-translate-y-1 transition" onClick={onEnterDashboard}>
+            <NeuButton variant="black" className="w-full py-3" onClick={onEnterDashboard} snapScale={true}>
               EXPLORE CANDIDATE DASHBOARD →
             </NeuButton>
           </NeuCard>
@@ -299,20 +324,27 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
         </div>
       </section>
 
-      {/* Features Grid Section */}
+      {/* Features Grid Section - Using responsive-grid: repeat(auto-fit, minmax(250px, 1fr)) */}
       <section id="features" className="px-6 py-20 md:py-28 max-w-7xl mx-auto space-y-12">
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <NeuBadge variant="yellow" className="animate-pulse">COMPLETE CAPABILITIES</NeuBadge>
-          <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-black">
+          
+          {/* Clipped Heading */}
+          <ClippedHeading
+            as="h2"
+            innerClassName="text-clamp-heading font-black uppercase tracking-tight text-black"
+          >
             EVERYTHING YOU NEED TO WALK IN CONFIDENT
-          </h2>
+          </ClippedHeading>
+
           <p className="text-sm font-bold text-slate-700">
             A complete, production-grade technical interview preparation platform in one place.
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          <NeuCard color="cyan" className="space-y-3 neu-card-hover">
+        {/* Responsive Layouts - grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); width: 100%; max-width: 100%; */}
+        <div className="responsive-grid">
+          <NeuCard color="cyan" className="space-y-3" hoverSnap={true} revealOnScroll={true}>
             <NeuBadge variant="black">01 · EVALUATION</NeuBadge>
             <h3 className="text-xl font-black uppercase text-black">DEEP ANSWER EVALUATION</h3>
             <p className="text-xs font-bold text-slate-800 leading-relaxed">
@@ -320,7 +352,7 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
             </p>
           </NeuCard>
 
-          <NeuCard color="pink" className="space-y-3 neu-card-hover">
+          <NeuCard color="pink" className="space-y-3" hoverSnap={true} revealOnScroll={true}>
             <NeuBadge variant="black">02 · BEHAVIORAL</NeuBadge>
             <h3 className="text-xl font-black uppercase text-black">BEHAVIORAL & COMMUNICATION METRICS</h3>
             <p className="text-xs font-bold text-slate-800 leading-relaxed">
@@ -328,7 +360,7 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
             </p>
           </NeuCard>
 
-          <NeuCard color="green" className="space-y-3 neu-card-hover">
+          <NeuCard color="green" className="space-y-3" hoverSnap={true} revealOnScroll={true}>
             <NeuBadge variant="black">03 · RESUME</NeuBadge>
             <h3 className="text-xl font-black uppercase text-black">AI RESUME ANALYSIS</h3>
             <p className="text-xs font-bold text-slate-800 leading-relaxed">
@@ -336,7 +368,7 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
             </p>
           </NeuCard>
 
-          <NeuCard color="cream" className="space-y-3 neu-card-hover">
+          <NeuCard color="cream" className="space-y-3" hoverSnap={true} revealOnScroll={true}>
             <NeuBadge variant="black">04 · ANALYTICS</NeuBadge>
             <h3 className="text-xl font-black uppercase text-black">PERFORMANCE DASHBOARDS</h3>
             <p className="text-xs font-bold text-slate-800 leading-relaxed">
@@ -344,7 +376,7 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
             </p>
           </NeuCard>
 
-          <NeuCard color="yellow" className="space-y-3 neu-card-hover">
+          <NeuCard color="yellow" className="space-y-3" hoverSnap={true} revealOnScroll={true}>
             <NeuBadge variant="black">05 · RETRIEVAL</NeuBadge>
             <h3 className="text-xl font-black uppercase text-black">GRAPH INTELLIGENCE</h3>
             <p className="text-xs font-bold text-slate-800 leading-relaxed">
@@ -352,7 +384,7 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
             </p>
           </NeuCard>
 
-          <NeuCard color="white" className="space-y-3 neu-card-hover">
+          <NeuCard color="white" className="space-y-3" hoverSnap={true} revealOnScroll={true}>
             <NeuBadge variant="black">06 · ADAPTIVE</NeuBadge>
             <h3 className="text-xl font-black uppercase text-black">REAL-TIME FOLLOW-UPS</h3>
             <p className="text-xs font-bold text-slate-800 leading-relaxed">
@@ -368,22 +400,26 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
           
           <div className="space-y-2">
             <NeuBadge variant="pink">QUESTIONS & ANSWERS</NeuBadge>
-            <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-black">
+            
+            <ClippedHeading
+              as="h2"
+              innerClassName="text-clamp-heading font-black uppercase tracking-tight text-black"
+            >
               FREQUENTLY ASKED QUESTIONS
-            </h2>
+            </ClippedHeading>
           </div>
 
-          <div className="divide-y-3 divide-black border-3 border-black bg-[#FFFDF6] overflow-hidden shadow-neu">
+          <div className="divide-y-3 divide-black border-3 border-black bg-[#FFFDF6] overflow-hidden shadow-neu reveal-on-scroll">
             {FAQS.map((faq, idx) => {
               const isOpen = openFaq === idx
               return (
                 <div key={idx} className="bg-white">
                   <button
                     onClick={() => toggleFaq(idx)}
-                    className="w-full flex items-center justify-between p-5 text-left font-black text-sm uppercase hover:bg-[#F7CB46]/30 transition-colors"
+                    className="w-full flex items-center justify-between p-5 text-left font-black text-sm uppercase hover:bg-[#F7CB46]/30 transition-colors neu-btn-snap"
                   >
                     <span>{faq.q}</span>
-                    <span className={`font-mono text-xl font-black transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#FE90E8]' : ''}`}>
+                    <span className={`font-mono text-xl font-black transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#FE90E8]' : ''}`}>
                       ↓
                     </span>
                   </button>
@@ -402,14 +438,23 @@ export function LandingPage({ onEnterDashboard, onOpenResumeAI }: LandingPagePro
       {/* Footer CTA */}
       <footer className="border-t-3 border-black bg-[#F7CB46] px-6 py-20 text-center">
         <div className="max-w-3xl mx-auto space-y-6">
-          <h2 className="text-3xl sm:text-5xl font-black uppercase text-black">
+          <ClippedHeading
+            as="h2"
+            innerClassName="text-clamp-heading font-black uppercase text-black"
+          >
             READY TO TEST WHAT YOU ACTUALLY KNOW?
-          </h2>
+          </ClippedHeading>
           <p className="text-sm font-bold text-slate-900">
             Launch your personalized AI technical interview session or evaluate candidate resumes now.
           </p>
           <div className="pt-2">
-            <NeuButton variant="black" size="lg" className="px-10 py-4 shadow-neu-lg hover:scale-105 transition-transform" onClick={onEnterDashboard}>
+            <NeuButton
+              variant="black"
+              size="lg"
+              className="px-10 py-4 shadow-neu-lg"
+              onClick={onEnterDashboard}
+              snapScale={true}
+            >
               ENTER DASHBOARD NOW →
             </NeuButton>
           </div>

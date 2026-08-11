@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+:root {
+  --ease-snappy: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-stepped: steps(2, end);
+  --ease-industrial: cubic-bezier(0.05, 0.9, 0.1, 1);
+  --blur-zero: none;
+}
+
 @layer base {
   body {
     background-color: #FFFDF6;
@@ -8,6 +15,7 @@
     color: #000000;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
 
   #root {
@@ -30,33 +38,112 @@
 .shadow-neu-lg { box-shadow: 6px 6px 0px 0px #000000; }
 .shadow-neu-sm { box-shadow: 2px 2px 0px 0px #000000; }
 
+/* Responsive Layout Grid Spec */
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  width: 100%;
+  max-width: 100%;
+  gap: clamp(1rem, 2.5vw, 2rem);
+}
+
+/* Fluid Typography Spec using clamp() */
+.text-clamp-hero {
+  font-size: clamp(2.25rem, 5.5vw, 4.5rem);
+  line-height: 1.05;
+}
+
+.text-clamp-heading {
+  font-size: clamp(1.5rem, 3.8vw, 3rem);
+  line-height: 1.1;
+}
+
+.text-clamp-subheading {
+  font-size: clamp(1.125rem, 2.2vw, 1.75rem);
+  line-height: 1.25;
+}
+
+.padding-clamp {
+  padding: clamp(1rem, 3vw, 2.5rem);
+}
+
+.gap-clamp {
+  gap: clamp(1rem, 2.5vw, 2rem);
+}
+
+/* Typography Spec: Heading sliding up from a clipped container */
+.clip-container,
+.clip-heading {
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: bottom;
+  max-width: 100%;
+}
+
+.clip-block {
+  overflow: hidden;
+  display: block;
+  width: 100%;
+}
+
+.slide-up-heading {
+  display: block;
+  transform: translateY(115%);
+  transition: transform 0.28s var(--ease-snappy), opacity 0.2s var(--ease-stepped);
+  filter: none !important; /* 0% blur requirement */
+  will-change: transform;
+}
+
+.in-view .slide-up-heading,
+.clip-container.in-view .slide-up-heading,
+.clip-block.in-view .slide-up-heading,
+.slide-up-heading.in-view {
+  transform: translateY(0%);
+}
+
+/* Buttons & Cards Spec: Sudden 1-to-1 scale snaps or sliding up with 0% blur */
 .neu-btn {
   border: 2px solid #000000;
   box-shadow: 4px 4px 0px 0px #000000;
-  transition: all 0.15s ease-in-out;
+  transition: transform 0.08s var(--ease-stepped), box-shadow 0.08s var(--ease-stepped), background-color 0.1s ease;
   font-weight: 700;
+  filter: none !important; /* 0% blur requirement */
 }
 
-.neu-btn:hover {
-  transform: translate(-2px, -2px);
+.neu-btn:hover,
+.neu-btn-snap:hover {
+  transform: scale(1.02) translate(-2px, -2px);
   box-shadow: 6px 6px 0px 0px #000000;
+  filter: none !important;
 }
 
-.neu-btn:active {
-  transform: translate(2px, 2px);
+.neu-btn:active,
+.neu-btn-snap:active {
+  transform: scale(0.97) translate(2px, 2px);
   box-shadow: 0px 0px 0px 0px #000000;
+  filter: none !important;
 }
 
 .neu-card {
   border: 3px solid #000000;
   box-shadow: 5px 5px 0px 0px #000000;
   background-color: #FFFFFF;
-  transition: all 0.2s ease-in-out;
+  transition: transform 0.12s var(--ease-snappy), box-shadow 0.12s var(--ease-snappy);
+  filter: none !important; /* 0% blur requirement */
 }
 
-.neu-card-hover:hover {
-  transform: translate(-3px, -3px);
+.neu-card-hover:hover,
+.neu-card-snap:hover {
+  transform: scale(1.015) translate(-3px, -3px);
   box-shadow: 8px 8px 0px 0px #000000;
+  filter: none !important;
+}
+
+.neu-card-hover:active,
+.neu-card-snap:active {
+  transform: scale(0.985) translate(1px, 1px);
+  box-shadow: 2px 2px 0px 0px #000000;
+  filter: none !important;
 }
 
 .neu-badge {
@@ -65,6 +152,33 @@
   font-weight: 800;
   text-transform: uppercase;
   font-family: monospace;
+  filter: none !important;
+}
+
+/* Scroll-Triggered Reveal Animations (Fast, Snappy, Industrial, 0% blur) */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(28px) scale(0.98);
+  transition: transform 0.22s var(--ease-snappy), opacity 0.15s var(--ease-stepped);
+  filter: none !important;
+  will-change: transform, opacity;
+}
+
+.reveal-on-scroll.in-view {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.reveal-snap-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: transform 0.16s var(--ease-stepped), opacity 0.12s ease-out;
+  filter: none !important;
+}
+
+.reveal-snap-scale.in-view {
+  opacity: 1;
+  transform: scale(1);
 }
 
 /* Animations */

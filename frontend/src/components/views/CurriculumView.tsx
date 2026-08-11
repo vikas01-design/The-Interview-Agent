@@ -1,30 +1,39 @@
 import { NeuCard } from '../neu/NeuCard'
 import { NeuBadge } from '../neu/NeuBadge'
+import { ClippedHeading } from '../neu/ClippedHeading'
 import type { Candidate } from '../../types'
+import { useScrollReveal } from '../../utils/useScrollReveal'
 
 interface Props {
   candidate: Candidate
 }
 
 export function CurriculumView({ candidate }: Props) {
+  useScrollReveal()
   const missions = candidate.missions
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 md:space-y-12 pb-12">
       
       {/* Header */}
-      <div className="space-y-2 border-b-3 border-black pb-4">
+      <div className="space-y-2 border-b-3 border-black pb-4 reveal-on-scroll">
         <NeuBadge variant="yellow">JOURNEY MAP</NeuBadge>
-        <h1 className="text-3xl md:text-5xl font-black uppercase text-black">
+        
+        <ClippedHeading
+          as="h1"
+          innerClassName="text-clamp-heading font-black uppercase text-black"
+          immediate={true}
+        >
           31-DAY AI ENGINEERING JOURNEY
-        </h1>
+        </ClippedHeading>
+
         <p className="text-sm font-bold text-slate-700">
           Interactive cohort mission status, completion verification, and technical topic mapping for {candidate.member.name}.
         </p>
       </div>
 
-      {/* 31 Day Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* 31 Day Responsive Grid using responsive-grid spec */}
+      <div className="responsive-grid">
         {missions.map((m) => {
           const isPassed = m.passed
           const isSkipped = m.skipped
@@ -34,6 +43,8 @@ export function CurriculumView({ candidate }: Props) {
               key={m.day}
               color={isPassed ? 'white' : isSkipped ? 'pink' : 'white'}
               className={`space-y-3 ${isPassed ? 'border-l-8 border-l-[#99E885]' : isSkipped ? 'border-l-8 border-l-[#FE90E8]' : ''}`}
+              hoverSnap={true}
+              revealOnScroll={true}
             >
               <div className="flex items-center justify-between">
                 <NeuBadge variant={isPassed ? 'green' : isSkipped ? 'pink' : 'black'}>

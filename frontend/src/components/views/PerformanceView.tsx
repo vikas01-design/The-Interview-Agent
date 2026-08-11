@@ -1,55 +1,64 @@
 import { NeuCard } from '../neu/NeuCard'
 import { NeuBadge } from '../neu/NeuBadge'
+import { ClippedHeading } from '../neu/ClippedHeading'
 import type { Candidate } from '../../types'
+import { useScrollReveal } from '../../utils/useScrollReveal'
 
 interface Props {
   candidate: Candidate
 }
 
 export function PerformanceView({ candidate }: Props) {
+  useScrollReveal()
   const member = candidate.member
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 md:space-y-12 pb-12">
       
-      {/* Header */}
-      <div className="space-y-2 border-b-3 border-black pb-4">
+      {/* Header with Clipped Heading */}
+      <div className="space-y-2 border-b-3 border-black pb-4 reveal-on-scroll">
         <NeuBadge variant="pink">ANALYTICS WORKSPACE</NeuBadge>
-        <h1 className="text-3xl md:text-5xl font-black uppercase text-black">
+        
+        <ClippedHeading
+          as="h1"
+          innerClassName="text-clamp-heading font-black uppercase text-black"
+          immediate={true}
+        >
           PERFORMANCE DASHBOARD
-        </h1>
+        </ClippedHeading>
+
         <p className="text-sm font-bold text-slate-700">
           In-depth technical knowledge breakdown, communication scoring, and topic mastery metrics for {member.name}.
         </p>
       </div>
 
-      {/* Top Metrics Row */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
-        <NeuCard color="yellow">
+      {/* Top Metrics Row responsive grid */}
+      <div className="responsive-grid">
+        <NeuCard color="yellow" hoverSnap={true} revealOnScroll={true}>
           <span className="font-mono text-[10px] font-black uppercase text-black">OVERALL SCORE</span>
           <div className="mt-1 text-4xl font-black font-mono text-black">82 / 100</div>
           <span className="text-[10px] font-bold text-slate-900 mt-1 block">GRADE: B+</span>
         </NeuCard>
 
-        <NeuCard color="cyan">
+        <NeuCard color="cyan" hoverSnap={true} revealOnScroll={true}>
           <span className="font-mono text-[10px] font-black uppercase text-black">TECHNICAL SCORE</span>
           <div className="mt-1 text-4xl font-black font-mono text-black">86%</div>
           <span className="text-[10px] font-bold text-slate-900 mt-1 block">CONCEPT MASTERY</span>
         </NeuCard>
 
-        <NeuCard color="green">
+        <NeuCard color="green" hoverSnap={true} revealOnScroll={true}>
           <span className="font-mono text-[10px] font-black uppercase text-black">PROBLEM SOLVING</span>
           <div className="mt-1 text-4xl font-black font-mono text-black">78%</div>
           <span className="text-[10px] font-bold text-slate-900 mt-1 block">TRADE-OFF ANALYSIS</span>
         </NeuCard>
 
-        <NeuCard color="pink">
+        <NeuCard color="pink" hoverSnap={true} revealOnScroll={true}>
           <span className="font-mono text-[10px] font-black uppercase text-black">COMMUNICATION</span>
           <div className="mt-1 text-4xl font-black font-mono text-black">88%</div>
           <span className="text-[10px] font-bold text-slate-900 mt-1 block">CLARITY & STRUCTURE</span>
         </NeuCard>
 
-        <NeuCard color="cream">
+        <NeuCard color="cream" hoverSnap={true} revealOnScroll={true}>
           <span className="font-mono text-[10px] font-black uppercase text-black">REASONING SCORE</span>
           <div className="mt-1 text-4xl font-black font-mono text-black">81%</div>
           <span className="text-[10px] font-bold text-slate-900 mt-1 block">LOGICAL STEP-THROUGH</span>
@@ -57,9 +66,11 @@ export function PerformanceView({ candidate }: Props) {
       </div>
 
       {/* Curriculum Topic Mastery */}
-      <NeuCard color="white" className="space-y-6">
+      <NeuCard color="white" className="space-y-6" hoverSnap={true} revealOnScroll={true}>
         <div className="flex items-center justify-between border-b-2 border-black pb-3">
-          <h3 className="font-black text-xl uppercase tracking-tight">CURRICULUM TOPIC MASTERY BREAKDOWN</h3>
+          <ClippedHeading as="h3" innerClassName="font-black text-xl uppercase tracking-tight">
+            CURRICULUM TOPIC MASTERY BREAKDOWN
+          </ClippedHeading>
           <NeuBadge variant="cyan">TOPIC BY TOPIC</NeuBadge>
         </div>
 
@@ -131,15 +142,17 @@ export function PerformanceView({ candidate }: Props) {
       </NeuCard>
 
       {/* Answer Quality & Progression Timeline */}
-      <NeuCard color="white" className="space-y-4">
+      <NeuCard color="white" className="space-y-4" hoverSnap={true} revealOnScroll={true}>
         <div className="flex items-center justify-between border-b-2 border-black pb-3">
-          <h3 className="font-black text-xl uppercase tracking-tight">ANSWER QUALITY PROGRESSION</h3>
+          <ClippedHeading as="h3" innerClassName="font-black text-xl uppercase tracking-tight">
+            ANSWER QUALITY PROGRESSION
+          </ClippedHeading>
           <NeuBadge variant="black">LAST 8 INTERVIEW QUESTIONS</NeuBadge>
         </div>
 
-        <div className="grid grid-cols-4 sm:grid-cols-8 gap-3 pt-2">
+        <div className="responsive-grid pt-2">
           {[82, 74, 91, 78, 86, 68, 89, 85].map((score, idx) => (
-            <div key={idx} className="border-2 border-black bg-[#FFFDF6] p-3 text-center">
+            <div key={idx} className="border-2 border-black bg-[#FFFDF6] p-3 text-center neu-btn-snap">
               <span className="font-mono text-[10px] font-black text-slate-500 block">Q{idx + 1}</span>
               <span className={`font-mono text-xl font-black ${score >= 80 ? 'text-[#99E885]' : 'text-black'}`}>
                 {score}
