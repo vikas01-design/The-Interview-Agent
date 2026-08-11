@@ -27,3 +27,8 @@ logs/
 .DS_Store
 .vscode/
 .idea/
+
+# Session & Ingestion Markers
+backend/data/sessions/
+.breeth_*
+

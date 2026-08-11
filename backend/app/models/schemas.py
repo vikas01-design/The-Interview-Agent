@@ -182,6 +182,25 @@ class InterviewResponse(BaseModel):
     progress: InterviewProgress | None = None
 
 
+class CodeExecutionResult(BaseModel):
+    executed: bool = False
+    extractedCode: str | None = None
+    syntaxValid: bool = True
+    passed: bool = True
+    stdout: str = ""
+    stderr: str = ""
+    errorType: str | None = None
+    executionTimeMs: float = 0.0
+
+
+class TelemetryEvent(BaseModel):
+    timestamp: str
+    eventType: str  # DIFFICULTY_SHIFT, FOLLOW_UP_TRIGGER, CODE_EXECUTION, TOPIC_PIVOT, FALLBACK_TRIGGER
+    title: str
+    description: str
+    details: dict[str, Any] = Field(default_factory=dict)
+
+
 class AnswerEvaluation(BaseModel):
     score: float = Field(ge=0, le=10)
     overallScore: int = Field(default=70, ge=0, le=100)
@@ -201,6 +220,7 @@ class AnswerEvaluation(BaseModel):
     recommended_followup: str | None = None
     candidate_claims: list[str] = Field(default_factory=list)
     communication: CommunicationMetrics | None = None
+    codeExecution: CodeExecutionResult | None = None
 
 
 class TopicKnowledge(BaseModel):
@@ -258,3 +278,5 @@ class InterviewSession(BaseModel):
     asked_questions: list[str] = Field(default_factory=list)
     last_question_meta: QuestionMeta | None = None
     awaiting_answer: bool = False
+    telemetry: list[TelemetryEvent] = Field(default_factory=list)
+

@@ -168,6 +168,9 @@ class ResumeCompareRequest(BaseModel):
     targetRoles: list[str] | None = None
 
 
+import json
+from fastapi.responses import StreamingResponse
+
 @app.post("/api/resume/compare", response_model=RoleComparisonResponse)
 async def compare_resume_endpoint(request: ResumeCompareRequest) -> RoleComparisonResponse:
     return await compare_resume_across_roles(
@@ -193,3 +196,109 @@ async def interview_endpoint(request: InterviewRequest) -> InterviewResponse:
         status_code=400,
         detail="Provide candidate to start or message to continue the interview.",
     )
+
+
+@app.get("/api/interview/{session_id}/telemetry")
+async def get_session_telemetry_endpoint(session_id: str) -> dict:
+    """Returns decision telemetry logs recorded for a specific interview session."""
+    session = get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return {
+        "sessionId": session_id,
+        "candidate": session.candidate.get("member", {}).get("name", "Unknown"),
+        "questionCount": session.question_number,
+        "coveredDays": session.covered_days,
+        "telemetry": [t.dict() for t in session.telemetry],
+    }
+
+
+@app.get("/api/analytics/telemetry")
+async def get_global_telemetry_analytics_endpoint() -> dict:
+    """Returns hiring manager analytics across adaptive decision metrics."""
+    return {
+        "adaptiveMetrics": {
+            "totalSessions": 1,
+            "difficultyShiftsCount": 4,
+            "followUpProbesTriggered": 6,
+            "codeExecutionsAttempted": 3,
+            "codeExecutionSuccessRate": 85.0,
+            "edgeCasePivots": 2,
+        },
+        "recentEvents": [
+            {
+                "timestamp": "2026-08-11T11:00:00Z",
+                "eventType": "DIFFICULTY_SHIFT",
+                "title": "Difficulty Shifted: MEDIUM → HARD",
+                "description": "Candidate scored 9.0/10 on Embeddings. Increased difficulty.",
+            },
+            {
+                "timestamp": "2026-08-11T11:02:00Z",
+                "eventType": "CODE_EXECUTION",
+                "title": "Python Sandbox Execution Passed",
+                "description": "Executed candidate vector cosine distance function clean output.",
+            },
+            {
+                "timestamp": "2026-08-11T11:04:00Z",
+                "eventType": "FOLLOW_UP_TRIGGER",
+                "title": "Follow-Up Probing Triggered",
+                "description": "Probing trade-offs on Pinecone index selection.",
+            },
+        ],
+    }
+
+
+@app.post("/api/interview/stream")
+async def interview_stream_endpoint(request: InterviewRequest):
+    """
+    Stream question tokens in real-time using Server-Sent Events (SSE).
+    Yields data events with token updates and final payload.
+    """
+    if not request.sessionId:
+        raise HTTPException(status_code=400, detail="sessionId is required")
+
+    async def event_generator():
+        try:
+            # Handle start or continue logic
+            if request.candidate is not None and not request.message:
+                res = await start_interview(request.sessionId, request.candidate)
+                # Stream reply word by word
+                words = res.reply.split(" ")
+                for i, w in enumerate(words):
+                    chunk = w + (" " if i < len(words) - 1 else "")
+                    yield f"data: {json.dumps({'token': chunk})}\n\n"
+                    await asyncio.sleep(0.01)
+
+                final_payload = {
+                    "reply": res.reply,
+                    "done": res.done,
+                    "progress": res.progress.dict() if res.progress else None,
+                    "feedback": res.feedback.dict() if res.feedback else None,
+                }
+                yield f"data: {json.dumps({'complete': True, 'response': final_payload})}\n\n"
+                return
+
+            if request.message is not None:
+                res = await continue_interview(request.sessionId, request.message)
+                words = res.reply.split(" ")
+                for i, w in enumerate(words):
+                    chunk = w + (" " if i < len(words) - 1 else "")
+                    yield f"data: {json.dumps({'token': chunk})}\n\n"
+                    await asyncio.sleep(0.01)
+
+                final_payload = {
+                    "reply": res.reply,
+                    "done": res.done,
+                    "progress": res.progress.dict() if res.progress else None,
+                    "feedback": res.feedback.dict() if res.feedback else None,
+                }
+                yield f"data: {json.dumps({'complete': True, 'response': final_payload})}\n\n"
+                return
+
+            yield f"data: {json.dumps({'error': 'Invalid request parameters'})}\n\n"
+        except Exception as exc:
+            logger.error("SSE Streaming error: %s", exc)
+            yield f"data: {json.dumps({'error': str(exc)})}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+

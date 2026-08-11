@@ -8,6 +8,7 @@ import { NeuBadge } from './neu/NeuBadge'
 import { addFinishedSession } from '../utils/candidateStore'
 import { speakQuestion, stopSpeech, pauseSpeech, resumeSpeech, SpeechRecognitionManager } from '../utils/speech'
 import { CameraMonitorWidget, type IntegrityEvent } from './CameraMonitorWidget'
+import { TelemetryDashboardModal } from './TelemetryDashboardModal'
 
 interface Props {
   candidate: Candidate
@@ -47,6 +48,9 @@ export function InterviewScreen({
   const [error, setError] = useState<string | null>(null)
   const [progress, setProgress] = useState<InterviewProgress | null>(null)
   const [isTyping, setIsTyping] = useState(false)
+
+  const [telemetryModalOpen, setTelemetryModalOpen] = useState(false)
+
 
   // Voice & TTS / STT States
   const [voiceMode, setVoiceMode] = useState(voiceModeInitial)
@@ -326,6 +330,13 @@ export function InterviewScreen({
             VOICE: {voiceMode ? '● ON' : '○ OFF'}
           </button>
 
+          <button
+            onClick={() => setTelemetryModalOpen(true)}
+            className="px-2 sm:px-3 py-1 border-2 border-black font-black uppercase transition bg-amber-300 hover:bg-amber-400 text-black shadow-neu-sm flex items-center gap-1"
+          >
+            📊 TELEMETRY
+          </button>
+
           <span className="bg-white border-2 border-black px-2 sm:px-3 py-1 shadow-neu-sm">
             Q{qNum < 10 ? `0${qNum}` : qNum}/10
           </span>
@@ -345,6 +356,14 @@ export function InterviewScreen({
           </button>
         </div>
       </header>
+
+      {telemetryModalOpen && (
+        <TelemetryDashboardModal
+          sessionId={sessionId}
+          onClose={() => setTelemetryModalOpen(false)}
+        />
+      )}
+
 
       {/* Mobile Drawer Quick Bar (< lg) */}
       <div className="flex lg:hidden shrink-0 items-center justify-between border-b-2 border-black bg-white px-4 py-2 text-[10px] font-mono font-black">

@@ -68,6 +68,47 @@ async def chat_completion(
     raise RuntimeError("LLM request failed after all retries")
 
 
+async def stream_chat_completion(
+    messages: list[dict[str, str]],
+    *,
+    temperature: float = 0.7,
+):
+    """Yield content tokens as they arrive from the LLM endpoint."""
+    if not LLM_ENABLED:
+        raise RuntimeError("LLM not configured")
+
+    payload: dict[str, Any] = {
+        "model": OPENAI_MODEL,
+        "messages": messages,
+        "temperature": temperature,
+        "stream": True,
+    }
+    headers = {
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    url = f"{OPENAI_BASE_URL.rstrip('/')}/chat/completions"
+
+    transport = httpx.AsyncHTTPTransport(local_address="0.0.0.0")
+    async with httpx.AsyncClient(timeout=60.0, transport=transport) as client:
+        async with client.stream("POST", url, headers=headers, json=payload) as response:
+            response.raise_for_status()
+            async for line in response.aiter_lines():
+                line = line.strip()
+                if not line or line.startswith(":") or line == "data: [DONE]":
+                    continue
+                if line.startswith("data: "):
+                    line = line[6:]
+                try:
+                    data = json.loads(line)
+                    delta = data["choices"][0]["delta"].get("content", "")
+                    if delta:
+                        yield delta
+                except (json.JSONDecodeError, KeyError, IndexError):
+                    continue
+
+
+
 async def chat_json(messages: list[dict[str, str]], *, temperature: float = 0.3) -> dict:
     # Gemini (and some other providers) don't support response_format: json_object.
     # Instead, append a JSON instruction to the last user message.

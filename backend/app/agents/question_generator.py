@@ -11,7 +11,7 @@ from app.models.schemas import (
     QuestionType,
 )
 from app.services.curriculum import curriculum_service
-from app.services.llm_client import chat_completion
+from app.services.llm_client import chat_completion, stream_chat_completion
 from app.services.profile import pick_difficulty
 from app.thebreeth.retrieval import retrieve_candidate_profile_context, retrieve_curriculum_context
 
@@ -34,6 +34,7 @@ Your behavior:
 - Keep the question to 1–4 sentences maximum.
 
 Personality: curious, technically rigorous, fair, encouraging but probing."""
+
 
 
 async def generate_question(

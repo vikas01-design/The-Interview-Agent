@@ -162,6 +162,27 @@ export async function compareResumeRoles(
   return res.json() as Promise<RoleComparisonResponse>
 }
 
+export async function fetchSessionTelemetry(sessionId: string) {
+  try {
+    const res = await fetch(`${API_BASE}/interview/${encodeURIComponent(sessionId)}/telemetry`)
+    if (res.ok) return await res.json()
+  } catch (err) {
+    console.warn('Session telemetry endpoint unavailable:', err)
+  }
+  return null
+}
+
+export async function fetchGlobalTelemetry() {
+  try {
+    const res = await fetch(`${API_BASE}/analytics/telemetry`)
+    if (res.ok) return await res.json()
+  } catch (err) {
+    console.warn('Global telemetry endpoint unavailable:', err)
+  }
+  return null
+}
+
 export function createSessionId(): string {
   return crypto.randomUUID()
 }
+

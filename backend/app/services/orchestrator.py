@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 import re
 
+from datetime import datetime
+
 from app.agents.evaluator import evaluate_answer
 from app.agents.feedback_generator import generate_feedback
 from app.agents.question_generator import build_question_meta, generate_question
@@ -12,6 +14,7 @@ from app.models.schemas import (
     InterviewProgress,
     InterviewResponse,
     InterviewSession,
+    TelemetryEvent,
     TranscriptEntry,
 )
 from app.services.planner import (
@@ -24,6 +27,23 @@ from app.services.profile import analyze_candidate, init_knowledge_model, update
 from app.services.session_store import get_session, save_session
 
 logger = logging.getLogger(__name__)
+
+
+def _log_telemetry(
+    session: InterviewSession,
+    event_type: str,
+    title: str,
+    description: str,
+    details: dict | None = None,
+) -> None:
+    event = TelemetryEvent(
+        timestamp=datetime.utcnow().isoformat() + "Z",
+        eventType=event_type,
+        title=title,
+        description=description,
+        details=details or {},
+    )
+    session.telemetry.append(event)
 
 
 async def start_interview(session_id: str, candidate: dict) -> InterviewResponse:
@@ -41,14 +61,28 @@ async def start_interview(session_id: str, candidate: dict) -> InterviewResponse
         knowledge_model=init_knowledge_model(analysis),
     )
 
+    _log_telemetry(
+        session,
+        "SESSION_START",
+        "Interview Session Started",
+        f"Candidate {candidate.get('member', {}).get('name', 'User')} started technical interview session.",
+        {"completed_days": analysis.completed_days, "target_days": analysis.target_days},
+    )
+
     from app.services.planner import _pick_day, _question_type_for_turn
 
-    # Opening: start with the first target day (weakness → medium entry point,
-    # or strong area → hard question to impress the candidate immediately).
     day = _pick_day(session)
     qtype = _question_type_for_turn(session)
     diff = pick_difficulty_for_day(session, day)
     meta = build_question_meta(session, day, qtype, difficulty=diff)
+
+    _log_telemetry(
+        session,
+        "INITIAL_QUESTION_SELECTED",
+        f"Selected Opening Day {day}",
+        f"Targeting Day {day} ({meta.topic}) with difficulty {diff.value}.",
+        {"day": day, "topic": meta.topic, "difficulty": diff.value},
+    )
 
     logger.info(
         "Starting interview session=%s candidate=%s day=%s type=%s diff=%s",
@@ -93,11 +127,34 @@ async def continue_interview(session_id: str, message: str) -> InterviewResponse
 
     # Detect edge case (very short, "I don't know", clarification requests, etc.)
     transition_hint = handle_edge_case_message(message)
+    if transition_hint:
+        _log_telemetry(
+            session,
+            "EDGE_CASE_DETECTED",
+            "Interviewer Adaptive Pivot Triggered",
+            transition_hint,
+            {"message_snippet": message[:100]},
+        )
 
     # Evaluate the answer against the curriculum and interview context.
     evaluation = await evaluate_answer(session, message, session.last_question_meta)
     session.evaluations.append(evaluation)
     session.last_evaluation = evaluation
+
+    if evaluation.codeExecution and evaluation.codeExecution.executed:
+        _log_telemetry(
+            session,
+            "CODE_EXECUTION",
+            "Python Code Execution Completed",
+            f"Executed candidate code: syntaxValid={evaluation.codeExecution.syntaxValid}, passed={evaluation.codeExecution.passed}",
+            {
+                "syntaxValid": evaluation.codeExecution.syntaxValid,
+                "passed": evaluation.codeExecution.passed,
+                "stdout": evaluation.codeExecution.stdout[:200],
+                "stderr": evaluation.codeExecution.stderr[:200],
+                "executionTimeMs": evaluation.codeExecution.executionTimeMs,
+            },
+        )
 
     logger.info(
         "session=%s Q%d score=%.1f depth=%.2f misconceptions=%s",
@@ -116,14 +173,31 @@ async def continue_interview(session_id: str, message: str) -> InterviewResponse
     if should_end_interview(session):
         return await _complete_interview(session)
 
+    old_diff = session.difficulty
     # Plan the next question (deterministic priority logic).
     day, qtype, diff, is_follow_up, plan_transition = plan_next_action(session, evaluation, message)
     meta = build_question_meta(session, day, qtype, is_follow_up=is_follow_up, difficulty=diff)
+
+    if diff != old_diff:
+        _log_telemetry(
+            session,
+            "DIFFICULTY_SHIFT",
+            f"Difficulty Shifted: {old_diff.value.upper()} → {diff.value.upper()}",
+            f"Adjusted question difficulty based on evaluation score {evaluation.score}/10.",
+            {"old_difficulty": old_diff.value, "new_difficulty": diff.value, "score": evaluation.score},
+        )
 
     # Update follow-up tracking.
     if is_follow_up:
         session.follow_up_depth += 1
         session.pending_follow_up = True
+        _log_telemetry(
+            session,
+            "FOLLOW_UP_TRIGGER",
+            f"Follow-up Probing Triggered (Depth {session.follow_up_depth})",
+            f"Deepening probe on topic '{meta.topic}' due to answer evaluation signals.",
+            {"topic": meta.topic, "depth": session.follow_up_depth},
+        )
     else:
         session.follow_up_depth = 0
         session.pending_follow_up = False
@@ -145,6 +219,7 @@ async def continue_interview(session_id: str, message: str) -> InterviewResponse
         done=False,
         progress=_build_progress(session),
     )
+
 
 
 async def _complete_interview(session: InterviewSession) -> InterviewResponse:

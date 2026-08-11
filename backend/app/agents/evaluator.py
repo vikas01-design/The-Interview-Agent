@@ -9,6 +9,7 @@ from app.models.schemas import (
     QuestionMeta,
     QuestionType,
 )
+from app.services.code_evaluator import execute_candidate_code
 from app.services.curriculum import curriculum_service
 from app.services.llm_client import chat_json
 
@@ -58,8 +59,12 @@ async def evaluate_answer(
     candidate_message: str,
     question_meta: QuestionMeta | None,
 ) -> AnswerEvaluation:
+    code_res = execute_candidate_code(candidate_message)
+
     if not LLM_ENABLED:
-        return _fallback_evaluation(candidate_message)
+        eval_res = _fallback_evaluation(candidate_message)
+        eval_res.codeExecution = code_res
+        return eval_res
 
     day_context = ""
     if question_meta:
@@ -88,6 +93,15 @@ async def evaluate_answer(
             f"Topic: Day {question_meta.day} — {question_meta.topic}"
         )
 
+    code_note = ""
+    if code_res:
+        code_note = (
+            f"\n\nDynamic Code Sandbox Execution Result:\n"
+            f"Executed: {code_res.executed} | Syntax Valid: {code_res.syntaxValid} | Passed: {code_res.passed}\n"
+            f"Stdout: {code_res.stdout}\n"
+            f"Stderr/Error: {code_res.stderr} (Type: {code_res.errorType})\n"
+        )
+
     user_prompt = f"""Question asked:
 {recent_q}
 
@@ -100,6 +114,7 @@ Curriculum reference:
 
 Candidate's answer:
 {candidate_message}
+{code_note}
 
 Perform deep technical and communication evaluation according to the schema."""
 
@@ -111,9 +126,14 @@ Perform deep technical and communication evaluation according to the schema."""
             ],
             temperature=0.2,
         )
-        return _parse_evaluation_json(data)
+        parsed = _parse_evaluation_json(data)
+        parsed.codeExecution = code_res
+        return parsed
     except Exception:
-        return _fallback_evaluation(candidate_message)
+        eval_res = _fallback_evaluation(candidate_message)
+        eval_res.codeExecution = code_res
+        return eval_res
+
 
 
 def _parse_evaluation_json(data: dict) -> AnswerEvaluation:
