@@ -79,14 +79,12 @@ def sanitize_user_profile(data: dict[str, Any]) -> dict[str, Any]:
     so candidates without actual interviews or uploaded resumes strictly start at 0.
     """
     sessions = data.get("sessions", [])
-    # Filter out mock/seed sessions
     real_sessions = [
         s for s in sessions
         if isinstance(s, dict) and s.get("id") not in ("SESS-101", "SESS-102") and not str(s.get("id", "")).startswith("SESS-10")
     ]
     data["sessions"] = real_sessions
 
-    # Purge mock resume score if it matches the legacy mock seed 79 with no actual uploaded resume
     if data.get("lastResumeScore") == 79 and (data.get("lastResumeDate") == "Aug 08, 2026" or not data.get("resumeText")):
         data["lastResumeScore"] = 0
         data["lastResumeRole"] = None
@@ -107,17 +105,17 @@ def get_user_profile(user_id: str, name: str = "Candidate User", email: str | No
         except Exception as exc:
             logger.warning("Failed to load user profile %s: %s", user_id, exc)
 
-    # Initial profile data for brand new candidate (0 sessions, 0% resume score)
+    # Initial profile data for brand new candidate (Clean unpopulated profile)
     new_profile: dict[str, Any] = {
         "userId": user_id,
         "name": name,
         "email": email,
-        "jobRole": "AI Engineer",
-        "yearsExperience": 3,
+        "jobRole": None,
+        "yearsExperience": None,
         "jobDescription": "",
-        "education": "B.S. Computer Science / AI",
-        "sessions": [],  # Strictly 0 sessions for un-interviewed candidate
-        "lastResumeScore": 0,  # Strictly 0% if no resume uploaded
+        "education": "Not specified",
+        "sessions": [],
+        "lastResumeScore": 0,
         "lastResumeRole": None,
         "missions": build_default_missions(),
         "createdAt": datetime.utcnow().isoformat(),
@@ -201,14 +199,14 @@ def calculate_user_dashboard(user_id: str) -> dict[str, Any]:
     profile = get_user_profile(user_id)
     sessions = profile.get("sessions", [])
     missions = profile.get("missions", [])
-    target_role = profile.get("jobRole", "AI Engineer")
+    target_role = profile.get("jobRole")
 
     has_sessions = len(sessions) > 0
-    avg_score = round(sum(s["score"] for s in sessions) / len(sessions)) if has_sessions else 0
-    avg_tech = round(sum(s["technicalKnowledge"] for s in sessions) / len(sessions)) if has_sessions else 0
-    avg_comm = round(sum(s["communication"] for s in sessions) / len(sessions)) if has_sessions else 0
+    avg_score = round(sum(s["score"] for s in sessions) / len(sessions)) if has_sessions else None
+    avg_tech = round(sum(s["technicalKnowledge"] for s in sessions) / len(sessions)) if has_sessions else None
+    avg_comm = round(sum(s["communication"] for s in sessions) / len(sessions)) if has_sessions else None
 
-    is_resume_matched = profile.get("lastResumeRole") == target_role
+    is_resume_matched = profile.get("lastResumeRole") == target_role if target_role else False
     resume_score = profile.get("lastResumeScore") if (is_resume_matched and profile.get("lastResumeScore")) else 0
 
     eval_strengths = list(set(st for s in sessions for st in s.get("strengths", []))) if has_sessions else []
@@ -230,7 +228,7 @@ def calculate_user_dashboard(user_id: str) -> dict[str, Any]:
             "hasUploadedResume": resume_score > 0,
         },
         "intelligence": {
-            "targetRole": target_role,
+            "targetRole": target_role or "Not configured",
             "topStrengths": eval_strengths,
             "topDrawbacks": eval_drawbacks,
             "hasData": has_sessions,
@@ -241,7 +239,7 @@ def calculate_user_dashboard(user_id: str) -> dict[str, Any]:
 def evaluate_candidate_json(user_id: str) -> dict[str, Any]:
     profile = get_user_profile(user_id)
     sessions = profile.get("sessions", [])
-    target_role = profile.get("jobRole", "AI Engineer")
+    target_role = profile.get("jobRole", "Not configured")
 
     has_interview = len(sessions) > 0
     last_resume = profile.get("lastResumeScore")

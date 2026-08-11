@@ -32,19 +32,20 @@ export function DashboardView({
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null)
 
   const sessions = userData.sessions || []
-  const currentRole = userData.jobRole || member.jobRole || 'AI Engineer'
-  const yearsExperience = userData.yearsExperience ?? member.yearsExperience ?? 3
+  const hasConfiguredRole = Boolean(userData.jobRole && userData.jobRole !== 'Not configured')
+  const currentRole = hasConfiguredRole ? userData.jobRole! : 'Not configured'
+  const yearsExperience = userData.yearsExperience !== null && userData.yearsExperience !== undefined ? userData.yearsExperience : 0
 
   // Real Metric Calculations — Strict Rules:
   const hasSessions = sessions.length > 0
-  const avgScore = hasSessions ? Math.round(sessions.reduce((acc, s) => acc + s.score, 0) / sessions.length) : 0
-  const avgTech = hasSessions ? Math.round(sessions.reduce((acc, s) => acc + s.technicalKnowledge, 0) / sessions.length) : 0
-  const avgComm = hasSessions ? Math.round(sessions.reduce((acc, s) => acc + s.communication, 0) / sessions.length) : 0
+  const avgScore = hasSessions ? Math.round(sessions.reduce((acc, s) => acc + s.score, 0) / sessions.length) : null
+  const avgTech = hasSessions ? Math.round(sessions.reduce((acc, s) => acc + s.technicalKnowledge, 0) / sessions.length) : null
+  const avgComm = hasSessions ? Math.round(sessions.reduce((acc, s) => acc + s.communication, 0) / sessions.length) : null
 
   // Resume Score — Strict Rules:
   const hasResumeScore = typeof userData.lastResumeScore === 'number' && userData.lastResumeScore > 0
-  const isResumeRoleMatched = userData.lastResumeRole === currentRole
-  const resumeScore: number = hasResumeScore && isResumeRoleMatched && typeof userData.lastResumeScore === 'number' ? userData.lastResumeScore : 0
+  const isResumeRoleMatched = hasConfiguredRole && userData.lastResumeRole === currentRole
+  const resumeScore: number | null = hasResumeScore && isResumeRoleMatched && typeof userData.lastResumeScore === 'number' ? userData.lastResumeScore : null
 
   // Candidate Intelligence — Only extract from ACTUAL candidate session evaluations
   const evaluatedStrengths = Array.from(new Set(sessions.flatMap(s => s.strengths || [])))
@@ -106,8 +107,12 @@ export function DashboardView({
               <span className="text-slate-800">Target Position:</span>
               <span className="bg-white border-2 border-black px-3 py-1 font-black text-black shadow-neu-sm flex items-center gap-1.5">
                 <span>🎯 {currentRole}</span>
-                <span className="text-slate-400">·</span>
-                <span>{yearsExperience} yrs experience</span>
+                {hasConfiguredRole && (
+                  <>
+                    <span className="text-slate-400">·</span>
+                    <span>{yearsExperience} yrs experience</span>
+                  </>
+                )}
               </span>
 
               <NeuButton
@@ -117,7 +122,7 @@ export function DashboardView({
                 onClick={() => setEditModalOpen(true)}
                 snapScale={true}
               >
-                ✏️ EDIT
+                {hasConfiguredRole ? '✏️ EDIT' : '⚡ SET TARGET ROLE'}
               </NeuButton>
             </div>
           </div>
@@ -146,40 +151,48 @@ export function DashboardView({
           </div>
 
           <div className="mt-3 flex items-baseline gap-1">
-            <span className="font-mono text-5xl font-black text-black tabular-nums">{avgScore}</span>
-            <span className="font-mono text-sm font-bold text-slate-500">/ 100</span>
+            <span className="font-mono text-5xl font-black text-black tabular-nums">
+              {avgScore !== null ? avgScore : '—'}
+            </span>
+            {avgScore !== null && <span className="font-mono text-sm font-bold text-slate-500">/ 100</span>}
           </div>
           <p className="mt-2 text-xs font-bold text-slate-700 font-mono">
-            {hasSessions ? `Real Average Across ${sessions.length} Session${sessions.length === 1 ? '' : 's'}` : '0 Sessions Attended'}
+            {hasSessions ? `Real Average Across ${sessions.length} Session${sessions.length === 1 ? '' : 's'}` : 'No interviews completed yet.'}
           </p>
         </NeuCard>
 
         {/* Metric 2: Technical Knowledge */}
         <NeuCard color="cyan" className="border-3 border-black shadow-neu" hoverSnap={true} revealOnScroll={true}>
           <span className="font-mono text-xs font-black uppercase text-slate-800">TECHNICAL KNOWLEDGE</span>
-          <div className="mt-3 text-5xl font-black font-mono text-black tabular-nums">{avgTech}%</div>
+          <div className="mt-3 text-5xl font-black font-mono text-black tabular-nums">
+            {avgTech !== null ? `${avgTech}%` : '—'}
+          </div>
           <p className="mt-2 text-xs font-bold text-slate-800 font-mono">
-            {hasSessions ? 'Real Evaluation Score' : 'No Interview Attended Yet'}
+            {hasSessions ? 'Real Evaluation Score' : 'No evaluation data yet.'}
           </p>
         </NeuCard>
 
         {/* Metric 3: Communication */}
         <NeuCard color="pink" className="border-3 border-black shadow-neu" hoverSnap={true} revealOnScroll={true}>
           <span className="font-mono text-xs font-black uppercase text-slate-800">COMMUNICATION</span>
-          <div className="mt-3 text-5xl font-black font-mono text-black tabular-nums">{avgComm}%</div>
+          <div className="mt-3 text-5xl font-black font-mono text-black tabular-nums">
+            {avgComm !== null ? `${avgComm}%` : '—'}
+          </div>
           <p className="mt-2 text-xs font-bold text-slate-800 font-mono">
-            {hasSessions ? 'Real Behavioral Score' : 'No Interview Attended Yet'}
+            {hasSessions ? 'Real Behavioral Score' : 'No interview communication data yet.'}
           </p>
         </NeuCard>
 
         {/* Metric 4: Resume Match */}
         <NeuCard color="green" className="border-3 border-black shadow-neu" hoverSnap={true} revealOnScroll={true}>
           <span className="font-mono text-xs font-black uppercase text-slate-800">RESUME MATCH</span>
-          <div className="mt-3 text-5xl font-black font-mono text-black tabular-nums">{resumeScore}%</div>
+          <div className="mt-3 text-5xl font-black font-mono text-black tabular-nums">
+            {resumeScore !== null ? `${resumeScore}%` : '—'}
+          </div>
           <p className="mt-2 text-xs font-bold text-slate-800 font-mono truncate">
-            {resumeScore > 0 ? `Target Role: ${currentRole}` : 'No Resume Uploaded'}
+            {resumeScore !== null ? `Target Role: ${currentRole}` : 'Upload a resume to begin analysis.'}
           </p>
-          {resumeScore === 0 && (
+          {resumeScore === null && (
             <div className="mt-2">
               <button
                 onClick={onOpenResumeClick}
@@ -352,8 +365,8 @@ export function DashboardView({
         <EditCareerTargetModal
           userId={member.id}
           userName={member.name}
-          currentRole={currentRole}
-          currentExperience={yearsExperience}
+          currentRole={hasConfiguredRole ? currentRole : 'AI Engineer'}
+          currentExperience={yearsExperience || 3}
           currentJobDescription={userData.jobDescription}
           onClose={() => setEditModalOpen(false)}
           onSaved={handleSavedTarget}

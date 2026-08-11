@@ -17,8 +17,8 @@ export interface UserCandidateData {
   userId: string
   name: string
   email?: string
-  jobRole: string
-  yearsExperience: number
+  jobRole: string | null
+  yearsExperience: number | null
   jobDescription?: string
   education: string
   sessions: SavedSession[]
@@ -32,7 +32,7 @@ export interface UserCandidateData {
   updatedAt?: string
 }
 
-// Initial unique seeds for dataset candidates (Each candidate has a DISTINCT, non-identical evaluation profile)
+// Initial unique seeds strictly for dataset candidate personas (NOT for Clerk authenticated users)
 const DATASET_SEED_PROFILES: Record<string, { jobRole: string; yearsExperience: number; lastResumeScore: number; sessions: SavedSession[] }> = {
   'CAND-001': {
     jobRole: 'Senior Data Engineer',
@@ -90,69 +90,6 @@ const DATASET_SEED_PROFILES: Record<string, { jobRole: string; yearsExperience: 
         drawbacks: ['Model Context Protocol (MCP)'],
       },
     ],
-  },
-  'CAND-004': {
-    jobRole: 'Business Analyst',
-    yearsExperience: 8,
-    lastResumeScore: 60,
-    sessions: [
-      {
-        id: 'SESS-CAND-004',
-        date: 'Aug 04, 2026',
-        role: 'Business Analyst',
-        score: 68,
-        technicalKnowledge: 64,
-        communication: 72,
-        status: 'Completed',
-        questionsCount: 6,
-        strengths: ['Data Requirements Analysis', 'Stakeholder Communication'],
-        drawbacks: ['Python Data Structures', 'FastAPI Microservices'],
-      },
-    ],
-  },
-  'CAND-005': {
-    jobRole: 'DevOps Engineer',
-    yearsExperience: 10,
-    lastResumeScore: 88,
-    sessions: [
-      {
-        id: 'SESS-CAND-005',
-        date: 'Aug 06, 2026',
-        role: 'DevOps Engineer',
-        score: 84,
-        technicalKnowledge: 88,
-        communication: 80,
-        status: 'Completed',
-        questionsCount: 10,
-        strengths: ['Docker & Kubernetes Deployment', 'CI/CD Pipelines'],
-        drawbacks: ['LLM Fine-Tuning Foundations'],
-      },
-    ],
-  },
-  'CAND-006': {
-    jobRole: 'Marketing Manager',
-    yearsExperience: 12,
-    lastResumeScore: 45,
-    sessions: [
-      {
-        id: 'SESS-CAND-006',
-        date: 'Aug 03, 2026',
-        role: 'Marketing Manager',
-        score: 58,
-        technicalKnowledge: 52,
-        communication: 64,
-        status: 'Completed',
-        questionsCount: 5,
-        strengths: ['User Requirement Scoping'],
-        drawbacks: ['Code Syntax & Algorithms', 'Vector Databases'],
-      },
-    ],
-  },
-  'CAND-007': {
-    jobRole: 'Computer Science Intern',
-    yearsExperience: 0,
-    lastResumeScore: 0,
-    sessions: [], // Un-interviewed intern candidate -> strictly 0 metrics & empty candidate intelligence!
   },
 }
 
@@ -418,7 +355,8 @@ export function createDefaultMissions(): Mission[] {
   }))
 }
 
-// Scoped User Candidate Data Loader & Saver with Auto-Sanitization of Legacy Seed Data
+// User-Scoped Candidate Data Loader & Saver
+// Strict Rule: Every Clerk user starts with a clean, unpopulated profile (0 sessions, 0/31 days, targetRole: null).
 export function loadUserCandidateData(userId: string, userName: string, userEmail?: string): UserCandidateData {
   const key = `ai_interview_candidate_${userId}`
   const seed = DATASET_SEED_PROFILES[userId]
@@ -428,7 +366,7 @@ export function loadUserCandidateData(userId: string, userName: string, userEmai
     if (existing) {
       const parsed = JSON.parse(existing)
       
-      // Filter out legacy mock sessions (SESS-101, SESS-102) while preserving candidate specific dataset sessions
+      // Filter out legacy seed sessions (SESS-101, SESS-102) if present
       const realSessions = Array.isArray(parsed.sessions)
         ? parsed.sessions.filter((s: any) => {
             if (!s || typeof s !== 'object') return false
@@ -438,10 +376,10 @@ export function loadUserCandidateData(userId: string, userName: string, userEmai
 
       const cleanedData: UserCandidateData = {
         ...parsed,
-        name: userName || parsed.name || 'Candidate',
+        name: userName || parsed.name || 'Candidate User',
         email: userEmail || parsed.email,
-        jobRole: parsed.jobRole || (seed ? seed.jobRole : 'AI Engineer'),
-        yearsExperience: parsed.yearsExperience ?? (seed ? seed.yearsExperience : 3),
+        jobRole: parsed.jobRole !== undefined ? parsed.jobRole : (seed ? seed.jobRole : null),
+        yearsExperience: parsed.yearsExperience !== undefined ? parsed.yearsExperience : (seed ? seed.yearsExperience : null),
         sessions: realSessions,
         lastResumeScore: parsed.lastResumeScore ?? (seed ? seed.lastResumeScore : 0),
         lastResumeRole: parsed.lastResumeRole ?? (seed ? seed.jobRole : null),
@@ -455,19 +393,19 @@ export function loadUserCandidateData(userId: string, userName: string, userEmai
     console.error('Error reading candidate store from localStorage', err)
   }
 
-  // Initial user data instance for a fresh candidate or dataset persona
+  // Initial user data instance for a fresh Clerk candidate (Strictly clean defaults per specification)
   const initialData: UserCandidateData = {
     userId,
     name: userName || (seed ? userId : 'Candidate User'),
     email: userEmail,
-    jobRole: seed ? seed.jobRole : 'AI Engineer',
-    yearsExperience: seed ? seed.yearsExperience : 3,
-    education: 'B.S. Computer Science / AI',
-    sessions: seed ? seed.sessions : [], // dataset seed or 0 for fresh candidates
-    lastResumeScore: seed ? seed.lastResumeScore : 0,
+    jobRole: seed ? seed.jobRole : null, // Fresh user has NULL jobRole ("Not configured")
+    yearsExperience: seed ? seed.yearsExperience : null, // Fresh user has NULL experience
+    education: 'Not specified',
+    sessions: seed ? seed.sessions : [], // 0 sessions for new users
+    lastResumeScore: seed ? seed.lastResumeScore : 0, // 0% if no resume uploaded
     lastResumeRole: seed ? seed.jobRole : null,
     lastResumeDate: seed && seed.lastResumeScore > 0 ? 'Aug 08, 2026' : null,
-    missions: createDefaultMissions(),
+    missions: createDefaultMissions(), // 0 / 31 completed
     profileCreatedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
@@ -562,7 +500,7 @@ export function addFinishedSession(userId: string, userName: string, feedback: F
   const newSession: SavedSession = {
     id: `REAL-SESS-${Date.now()}`,
     date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-    role: targetRole || data.jobRole,
+    role: targetRole || data.jobRole || 'AI Engineer',
     score,
     technicalKnowledge: feedback.technicalKnowledge ?? 80,
     communication: feedback.communication ?? 85,
@@ -631,8 +569,8 @@ export function calculateCandidateMetrics(data: UserCandidateData): Candidate {
     member: {
       id: data.userId,
       name: data.name,
-      jobRole: data.jobRole,
-      yearsExperience: data.yearsExperience,
+      jobRole: data.jobRole || 'Not configured',
+      yearsExperience: data.yearsExperience ?? 0,
       education: data.education,
       status: `Active Candidate (${sessions.length} sessions, ${completedMissions.length}/31 days)`,
     },

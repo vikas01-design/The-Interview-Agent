@@ -24,15 +24,26 @@ import { CameraCheckModal } from './components/CameraCheckModal'
 type Mode = 'landing' | 'app'
 type View = 'dashboard' | 'config' | 'interview' | 'performance' | 'curriculum' | 'history' | 'settings'
 
+const FALLBACK_INTERVIEWER: Candidate = {
+  member: {
+    id: 'AI-INT-001',
+    name: 'Alex Rivera',
+    jobRole: 'Senior AI Architect',
+    yearsExperience: 10,
+    education: 'Ph.D. Computer Science',
+    status: 'AVAILABLE',
+  },
+  missions: [],
+  signals: { commitDays: 31, missionsCompleted: 31, missionsFirstTry: 30 },
+}
+
 function App() {
   const { user } = useUser()
   const [mode, setMode] = useState<Mode>('landing')
   const [activeView, setActiveView] = useState<View>('dashboard')
-  const [interviewers, setInterviewers] = useState<Candidate[]>([])
-  const [selectedInterviewer, setSelectedInterviewer] = useState<Candidate | null>(null)
+  const [interviewers, setInterviewers] = useState<Candidate[]>([FALLBACK_INTERVIEWER])
+  const [selectedInterviewer, setSelectedInterviewer] = useState<Candidate>(FALLBACK_INTERVIEWER)
   const [sessionId, setSessionId] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   const [resumeModalOpen, setResumeModalOpen] = useState(false)
   const [cameraModalOpen, setCameraModalOpen] = useState(false)
@@ -54,22 +65,22 @@ function App() {
       }
     } catch (e) {}
 
+    // Load AI Interviewer Personas asynchronously without blocking initial UI load
     loadCandidates()
       .then((data) => {
-        setInterviewers(data)
-        if (data.length > 0) {
+        if (data && data.length > 0) {
+          setInterviewers(data)
           setSelectedInterviewer(data[0])
         }
       })
-      .catch(() => setError('Failed to load AI interviewer personas from API.'))
-      .finally(() => setLoading(false))
+      .catch((err) => console.warn('Non-blocking interviewer loading notice:', err))
   }, [])
 
   const [refreshKey, setRefreshKey] = useState(0)
 
-  // Scope active candidate data dynamically to the currently selected persona in dropdown
-  const currentCandidateId = selectedInterviewer?.member?.id || user?.id || 'guest_candidate'
-  const currentCandidateName = selectedInterviewer?.member?.name || user?.fullName || user?.firstName || 'Candidate User'
+  // Scope active candidate data STRICTLY to authenticated Clerk user identity
+  const currentCandidateId = user?.id || 'guest_candidate'
+  const currentCandidateName = user?.fullName || user?.firstName || (user?.primaryEmailAddress?.emailAddress ? user.primaryEmailAddress.emailAddress.split('@')[0] : 'Candidate User')
   const userEmail = user?.primaryEmailAddress?.emailAddress
 
   const candidateData = useMemo(
@@ -81,12 +92,10 @@ function App() {
     [candidateData]
   )
 
-
   function handleInterviewerChange(interviewerId: string) {
     const found = interviewers.find((c) => c.member.id === interviewerId)
     if (found) {
       setSelectedInterviewer(found)
-      setRefreshKey((prev) => prev + 1)
     }
   }
 
@@ -131,33 +140,6 @@ function App() {
   }
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
-  if (loading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#FFFDF6] font-mono">
-        <div className="space-y-4 text-center">
-          <div className="mx-auto h-12 w-12 animate-spin border-4 border-black border-t-transparent"></div>
-          <p className="font-black text-sm uppercase text-black">INITIALIZING AI INTERVIEW AGENT PLATFORM...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (error || !selectedInterviewer) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#FFFDF6] font-mono">
-        <div className="space-y-4 text-center max-w-md border-3 border-black bg-white p-6 shadow-neu">
-          <p className="font-black text-sm text-[#FE90E8] uppercase">⚠ {error || 'No interviewer data available.'}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="neu-btn bg-[#F7CB46] text-black px-4 py-2 text-xs font-black"
-          >
-            RETRY CONNECTION →
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   // Render Neubrutalist Minimalist Landing Page as initial entry point
   if (mode === 'landing') {
@@ -338,9 +320,9 @@ function App() {
             </div>
 
             <div className="border-2 border-black bg-[#FFDC8B] p-3 space-y-1 shadow-neu-sm mt-6">
-              <span className="font-mono text-[9px] font-black uppercase text-black block">CANDIDATE PROFILE</span>
-              <p className="font-black text-xs text-black truncate">{activeCandidate.member.name}</p>
-              <span className="font-mono text-[9px] font-bold text-slate-700 block mt-1">INTERVIEWER: {selectedInterviewer.member.name}</span>
+              <span className="font-mono text-[9px] font-black uppercase text-black block">CLERK CANDIDATE PROFILE</span>
+              <p className="font-black text-xs text-black truncate">{currentCandidateName}</p>
+              <span className="font-mono text-[9px] font-bold text-slate-700 block mt-1 truncate">ID: {currentCandidateId}</span>
             </div>
           </aside>
         </div>
@@ -405,9 +387,9 @@ function App() {
 
           {/* Sidebar Footer Logged-In Candidate Card */}
           <div className="border-2 border-black bg-[#FFDC8B] p-3 space-y-1 shadow-neu-sm">
-            <span className="font-mono text-[9px] font-black uppercase text-black block">CANDIDATE PROFILE</span>
-            <p className="font-black text-xs text-black truncate">{activeCandidate.member.name}</p>
-            <span className="font-mono text-[9px] font-bold text-slate-700 block mt-1">INTERVIEWER: {selectedInterviewer.member.name}</span>
+            <span className="font-mono text-[9px] font-black uppercase text-black block">CLERK CANDIDATE PROFILE</span>
+            <p className="font-black text-xs text-black truncate">{currentCandidateName}</p>
+            <span className="font-mono text-[9px] font-bold text-slate-700 block mt-1 truncate">ID: {currentCandidateId}</span>
           </div>
         </aside>
 
@@ -490,7 +472,7 @@ function NavItem({
       className={`w-full flex items-center gap-3 px-3 py-2.5 font-mono text-xs font-black uppercase transition border-2 ${
         active
           ? 'bg-[#F7CB46] text-black border-black shadow-neu-sm'
-          : 'bg-white text-slate-800 border-transparent hover:border-black hover:bg-[#FFFDF6]'
+          : 'bg-[#FFFDF6] text-slate-800 border-transparent hover:border-black hover:bg-[#FFFDF6]'
       }`}
     >
       <span>{icon}</span>

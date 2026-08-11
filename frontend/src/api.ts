@@ -4,8 +4,12 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 const API_BASE = `${BASE_URL}/api`
 
 export async function loadCandidates(): Promise<Candidate[]> {
+  // Fast 800ms timeout controller to ensure instantaneous page initialization without spinner freezing
   try {
-    const res = await fetch(`${API_BASE}/candidates`)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 800)
+    const res = await fetch(`${API_BASE}/candidates`, { signal: controller.signal })
+    clearTimeout(timeoutId)
     if (res.ok) {
       const data = await res.json()
       if (data && Array.isArray(data.candidates) && data.candidates.length > 0) {
@@ -13,13 +17,20 @@ export async function loadCandidates(): Promise<Candidate[]> {
       }
     }
   } catch (err) {
-    console.warn('API candidates endpoint unavailable, using static fallback candidates:', err)
+    // Fast fallback if backend candidates endpoint is unavailable or times out
   }
 
-  const res = await fetch('/data/candidates.json')
-  if (!res.ok) throw new Error('Failed to load fallback candidates dataset')
-  const data = await res.json()
-  return data.candidates as Candidate[]
+  try {
+    const res = await fetch('/data/candidates.json')
+    if (res.ok) {
+      const data = await res.json()
+      return data.candidates as Candidate[]
+    }
+  } catch (err) {
+    console.warn('Fallback candidates file unavailable:', err)
+  }
+
+  return []
 }
 
 export async function fetchUserDashboardBackend(userId: string, name?: string, email?: string) {
@@ -202,7 +213,6 @@ export async function submitInterviewAnswer(
   answer: string,
   questionId?: string,
 ): Promise<InterviewResponse> {
-
   const res = await fetch(`${API_BASE}/interview/${encodeURIComponent(sessionId)}/answer`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -227,5 +237,3 @@ export async function getInterviewSession(sessionId: string) {
 export function createSessionId(): string {
   return crypto.randomUUID()
 }
-
-
