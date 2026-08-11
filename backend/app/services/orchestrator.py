@@ -49,8 +49,24 @@ def _log_telemetry(
 async def start_interview(session_id: str, candidate: dict) -> InterviewResponse:
     """
     Initialize a new 10-question technical interview session and generate Question 1.
+    If session already exists with active transcript, return existing session state.
     """
+    existing = get_session(session_id)
+    if existing and existing.transcript:
+        logger.info("Session %s already active (Q%d). Preserving existing state.", session_id, existing.question_number)
+        last_interviewer_msg = ""
+        for entry in reversed(existing.transcript):
+            if entry.role == "interviewer":
+                last_interviewer_msg = entry.content
+                break
+        return InterviewResponse(
+            reply=last_interviewer_msg or "Let's continue the interview.",
+            done=existing.status == "complete",
+            progress=_build_progress(existing),
+        )
+
     analysis = analyze_candidate(candidate)
+
     session = InterviewSession(
         session_id=session_id,
         candidate=candidate,

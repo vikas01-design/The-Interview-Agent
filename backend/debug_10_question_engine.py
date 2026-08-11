@@ -36,11 +36,14 @@ CANDIDATE = {
 
 async def run_tests():
     from app.services.orchestrator import start_interview, continue_interview
-    from app.services.session_store import get_session
+    from app.services.session_store import delete_session
+
+    session_id = "test-10q-session"
+    delete_session(session_id)
 
     print("=== Step 1: Initialize 10-Question Interview Session ===")
-    session_id = "test-10q-session"
     res = await start_interview(session_id, CANDIDATE)
+
     print("  Q1 Reply:", res.reply[:100])
     print("  Progress:", res.progress)
     assert res.progress.questionNumber == 1

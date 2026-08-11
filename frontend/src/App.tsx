@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+
 import { createSessionId, loadCandidates } from './api'
 import type { Candidate } from './types'
 
@@ -71,8 +72,15 @@ function App() {
   const currentCandidateName = selectedInterviewer?.member?.name || user?.fullName || user?.firstName || 'Candidate User'
   const userEmail = user?.primaryEmailAddress?.emailAddress
 
-  const candidateData = loadUserCandidateData(currentCandidateId, currentCandidateName, userEmail)
-  const activeCandidate = calculateCandidateMetrics(candidateData)
+  const candidateData = useMemo(
+    () => loadUserCandidateData(currentCandidateId, currentCandidateName, userEmail),
+    [currentCandidateId, currentCandidateName, userEmail, refreshKey]
+  )
+  const activeCandidate = useMemo(
+    () => calculateCandidateMetrics(candidateData),
+    [candidateData]
+  )
+
 
   function handleInterviewerChange(interviewerId: string) {
     const found = interviewers.find((c) => c.member.id === interviewerId)

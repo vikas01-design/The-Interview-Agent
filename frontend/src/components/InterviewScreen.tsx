@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { sendMessage, startInterview } from '../api'
+import { sendMessage, getInterviewSession, startInterviewSession } from '../api'
 import type { Candidate, ChatMessage, Feedback, InterviewProgress } from '../types'
 import { FeedbackReport, type IntegrityReportData } from './FeedbackReport'
 import { NeuCard } from './neu/NeuCard'
@@ -36,50 +36,48 @@ interface TurnFeedback {
 export function InterviewScreen({
   candidate,
   sessionId,
-  voiceModeInitial = true,
+  voiceModeInitial = false,
   cameraStreamInitial = null,
   onRestart,
 }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(true)
+  const [isTyping, setIsTyping] = useState(false)
+  const [progress, setProgress] = useState<InterviewProgress | null>(null)
   const [done, setDone] = useState(false)
   const [feedback, setFeedback] = useState<Feedback | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [progress, setProgress] = useState<InterviewProgress | null>(null)
-  const [isTyping, setIsTyping] = useState(false)
 
-  const [telemetryModalOpen, setTelemetryModalOpen] = useState(false)
-
-
-  // Voice & TTS / STT States
+  // Voice & Audio Controls
   const [voiceMode, setVoiceMode] = useState(voiceModeInitial)
   const [voiceState, setVoiceState] = useState<VoiceState>('QUESTION_READY')
-  const [speechSpeed, setSpeechSpeed] = useState<number>(1.0)
-  const [isMuted, setIsMuted] = useState(false)
   const [isSpeechPaused, setIsSpeechPaused] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
+  const [speechSpeed, setSpeechSpeed] = useState(1.0)
   const [isRecording, setIsRecording] = useState(false)
 
-  // Mobile Drawers
+  // Mobile Drawers & Camera Stream State
   const [signalsDrawerOpen, setSignalsDrawerOpen] = useState(false)
   const [timelineDrawerOpen, setTimelineDrawerOpen] = useState(false)
+  const [cameraStream] = useState<MediaStream | null>(cameraStreamInitial)
 
-  // Dynamic Live Knowledge Model
-  const [liveTechScore, setLiveTechScore] = useState(82)
-  const [liveDepthScore, setLiveDepthScore] = useState(74)
-  const [liveReasoningScore, setLiveReasoningScore] = useState(70)
-  const [liveCommScore, setLiveCommScore] = useState(86)
-
-  // Question-Level Feedbacks Array
+  // Dynamic Telemetry & Integrity Modal States
+  const [telemetryModalOpen, setTelemetryModalOpen] = useState(false)
+  const [integrityEvents, setIntegrityEvents] = useState<IntegrityEvent[]>([])
   const [turnFeedbacks, setTurnFeedbacks] = useState<Record<number, TurnFeedback>>({})
 
-  // Camera Integrity State
-  const [cameraStream] = useState<MediaStream | null>(cameraStreamInitial)
-  const [integrityEvents, setIntegrityEvents] = useState<IntegrityEvent[]>([])
+
+  // Real-time Candidate Evaluation Signals
+  const [liveTechScore, setLiveTechScore] = useState(82)
+  const [liveDepthScore, setLiveDepthScore] = useState(76)
+  const [liveReasoningScore, setLiveReasoningScore] = useState(78)
+  const [liveCommScore, setLiveCommScore] = useState(85)
 
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const sttManagerRef = useRef<SpeechRecognitionManager | null>(null)
+  const initializedSessionRef = useRef<string | null>(null)
 
   useEffect(() => {
     sttManagerRef.current = new SpeechRecognitionManager()
@@ -89,13 +87,54 @@ export function InterviewScreen({
     }
   }, [])
 
-  // Start interview initialization
+  // Start interview initialization & session restoration
   useEffect(() => {
     let cancelled = false
+    if (initializedSessionRef.current === sessionId) {
+      return
+    }
+
     async function init() {
       try {
-        const res = await startInterview(sessionId, candidate)
+        // Check if session already exists on backend to restore state
+        const existingSession = await getInterviewSession(sessionId)
         if (cancelled) return
+
+        if (existingSession && existingSession.transcript && existingSession.transcript.length > 0) {
+          initializedSessionRef.current = sessionId
+          const restoredMessages: ChatMessage[] = existingSession.transcript.map((t: any) => ({
+            role: t.role === 'candidate' ? 'candidate' : 'interviewer',
+            content: t.content,
+            topic: t.question_meta?.topic,
+            difficulty: t.question_meta?.difficulty,
+          }))
+          setMessages(restoredMessages)
+
+          if (existingSession.question_number) {
+            setProgress({
+              questionNumber: existingSession.question_number,
+              totalQuestions: existingSession.total_questions || 10,
+              attemptNumber: existingSession.attempt_number || 1,
+              minQuestions: 10,
+              coveredDays: existingSession.covered_days || [],
+              minDays: 4,
+              coveredTopics: existingSession.covered_topics || [],
+              currentDay: existingSession.current_day,
+              currentTopic: existingSession.current_topic,
+              difficulty: existingSession.difficulty || 'medium',
+              isFollowUp: existingSession.pending_follow_up || false,
+            })
+          }
+          if (existingSession.status === 'complete') {
+            setDone(true)
+          }
+          setLoading(false)
+          return
+        }
+
+        const res = await startInterviewSession(sessionId, candidate)
+        if (cancelled) return
+        initializedSessionRef.current = sessionId
         setMessages([
           {
             role: 'interviewer',
@@ -106,7 +145,6 @@ export function InterviewScreen({
         ])
         if (res.progress) setProgress(res.progress)
 
-        // Automatically speak initial question if voice mode active
         if (voiceModeInitial && res.reply) {
           triggerAITTS(res.reply)
         }
